@@ -276,16 +276,16 @@
       {%- elif key == "url_structure" or d.poor_url_structure is defined -%}
         {{ d.get("total",0) }} URLs checked.
         {%- if d.get("poor_url_structure",0) %} <strong style="color:var(--warn)">{{ d.poor_url_structure }}</strong> have messy URLs (too long or full of random characters).{%- else %} All URLs look clean ✓{%- endif %}
-      {%- elif d.get("errors") is not none and d.get("errors") is not defined is false or d.errors is defined -%}
+      {%- elif key == "code_validation" or d.errors is defined -%}
         {{ d.get("errors",0) }} HTML code errors and {{ d.get("warnings",0) }} warnings found (checked on homepage only).
       {%- elif d.get("lcp") -%}
         Speed score: <strong>{{ d.get("performance","—") }}/100</strong>. Page loads in {{ d.lcp }} (Google target: under 2.5 seconds).
-      {%- elif d.get("types_found") is not none -%}
+      {%- elif d.types_found is defined -%}
         Schema types found: {{ d.types_found | join(", ") or "None" }}.
         {%- if d.get("missing_types") %} Missing: {{ d.missing_types | join(", ") }}.{%- endif %}
-      {%- elif d.get("profiles_found") is not none -%}
+      {%- elif d.profiles_found is defined -%}
         {{ d.get("profiles_found",0) }} social profile{{ "s" if d.get("profiles_found",0) != 1 }} linked from the site.
-      {%- elif d.get("redirects_302") is not none or d.get("redirect_count") is not none -%}
+      {%- elif d.redirects_302 is defined or d.redirect_count is defined -%}
         {%- set rc = d.get("redirects_302", d.get("redirect_count",0)) -%}
         {{ rc }} redirect{{ "s" if rc != 1 }} using temporary (302) instead of permanent (301) redirects.
       {%- elif d -%}

@@ -120,7 +120,18 @@ async def run(
     )
 
     try:
-        pdf_path = render_pdf.render(html_path)
+        pdf_path = render_pdf.render(
+            job_id=job_id,
+            url=url,
+            pages=pages,
+            scores=scores,
+            gbp=gbp_data,
+            nap=nap_data,
+            screenshots=screenshots_data,
+            backlinks=backlinks_data,
+            psi_available=bool(psi_data and not next(iter(psi_data.values()), {}).get("error")),
+            html_path=html_path,
+        )
         pdf_path_str = str(pdf_path)
     except Exception:
         pdf_path_str = None

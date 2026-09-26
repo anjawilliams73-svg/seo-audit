@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>SEO Audit — {{ job.site_name }}</title>
+<style>
+/* ── PAGE SETUP ── */
+@page {
+  size: A4;
+  margin: 18mm 20mm 22mm 20mm;
+  @bottom-left { content: "SEO Audit · {{ job.site_name }} · {{ job.date }}"; font-size: 8pt; color: #aaa; font-family: Arial, sans-serif; }
+  @bottom-right { content: "Page " counter(page) " of " counter(pages); font-size: 8pt; color: #aaa; font-family: Arial, sans-serif; }
+}
+@page cover { margin: 0; @bottom-left { content: none; } @bottom-right { content: none; } }
+@page toc { margin: 18mm 20mm 22mm 20mm; @bottom-left { content: none; } @bottom-right { content: none; } }
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: Arial, sans-serif; font-size: 9pt; line-height: 1.55; color: #1a1a1a; background: #fff; }
+a { color: #354D08; text-decoration: none; }
+
+/* ── COLOURS ── */
+:root {
+  --green: #354D08; --lime: #c8f06a; --bg: #f7faf0;
+  --pass: #166534; --pass-bg: #dcfce7;
+  --warn: #92400e; --warn-bg: #fef3c7;
+  --fail: #991b1b; --fail-bg: #fee2e2;
+  --border: #d4e4b0; --muted: #6b7280;
+}
+
+/* ── COVER PAGE ── */
+.cover {
+  page: cover;
+  page-break-after: always;
+  background: #354D08;
+  color: #fff;
+  min-height: 297mm;
+  padding: 40mm 24mm 30mm;
+  display: block;
+}
+.cover-kicker { font-size: 8pt; letter-spacing: .2em; text-transform: uppercase; color: rgba(200,240,106,.6); margin-bottom: 10mm; }
+.cover-domain { font-size: 28pt; font-weight: 700; color: #fff; margin-bottom: 2mm; line-height: 1.1; }
+.cover-url { font-size: 9pt; color: rgba(255,255,255,.45); margin-bottom: 18mm; }
+
+.cover-score-block { display: inline-block; margin-bottom: 12mm; }
+.cover-score { font-size: 64pt; font-weight: 900; color: #c8f06a; line-height: 1; }
+.cover-score-label { font-size: 9pt; color: rgba(255,255,255,.45); margin-top: 1mm; }
+
+.cover-cats { margin-bottom: 16mm; }
+.cover-cat-row { display: flex; align-items: center; gap: 4mm; margin-bottom: 3mm; }
+.cover-cat-name { font-size: 8pt; color: rgba(255,255,255,.6); width: 40mm; }
+.cover-cat-bar-bg { flex: 1; height: 4pt; background: rgba(255,255,255,.15); border-radius: 2pt; }
+.cover-cat-bar { height: 4pt; background: #c8f06a; border-radius: 2pt; }
+.cover-cat-val { font-size: 8pt; font-weight: 700; color: #fff; width: 12mm; text-align: right; }
+
+.cover-meta-row { display: flex; gap: 12mm; margin-top: 8mm; padding-top: 6mm; border-top: 1px solid rgba(255,255,255,.15); }
+.cover-meta-item { font-size: 7pt; color: rgba(255,255,255,.45); }
+.cover-meta-item strong { display: block; font-size: 10pt; color: #fff; font-weight: 700; }
+
+/* ── TOC ── */
+.toc-page { page: toc; page-break-after: always; padding: 10mm 0; }
+.toc-title { font-size: 16pt; font-weight: 700; color: var(--green); margin-bottom: 6mm; padding-bottom: 3mm; border-bottom: 2pt solid var(--lime); }
+.toc-entry { display: flex; align-items: baseline; gap: 2mm; padding: 2mm 0; border-bottom: 1px dotted #ddd; font-size: 9pt; }
+.toc-num { color: var(--muted); width: 8mm; flex-shrink: 0; }
+.toc-label { flex: 1; color: var(--green); font-weight: 600; }
+.toc-dots { flex: 1; border-bottom: 1px dotted #ccc; margin: 0 2mm; height: 1em; }
+.toc-sub { font-size: 8pt; color: var(--muted); padding-left: 12mm; }
+
+/* ── SECTION PAGES ── */
+.section { page-break-before: always; padding: 0; }
+.section-first { page-break-before: avoid; }
+.section-header { background: var(--green); color: #fff; padding: 6mm 0 5mm; margin-bottom: 6mm; }
+.section-header h2 { font-size: 14pt; font-weight: 700; color: #fff; bookmark-level: 1; bookmark-label: content(); }
+.section-header .section-score { font-size: 10pt; color: rgba(255,255,255,.65); margin-top: 1mm; }
+
+h3 { font-size: 10pt; font-weight: 700; color: var(--green); margin: 5mm 0 3mm; bookmark-level: 2; bookmark-label: content(); }
+p { font-size: 8.5pt; color: var(--muted); margin-bottom: 3mm; }
+
+/* ── SCORE TILES ── */
+.tiles { display: flex; gap: 4mm; margin-bottom: 6mm; flex-wrap: wrap; }
+.tile { border: 1pt solid var(--border); border-radius: 4pt; padding: 4mm 5mm; text-align: center; min-width: 30mm; }
+.tile-num { font-size: 20pt; font-weight: 900; line-height: 1; }
+.tile-num.pass { color: var(--pass); }
+.tile-num.warn { color: var(--warn); }
+.tile-num.fail { color: var(--fail); }
+.tile-label { font-size: 7pt; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin-top: 1mm; }
+.tile-note { font-size: 6.5pt; color: #aaa; }
+
+/* ── FIX FIRST ── */
+.fix-list { margin-bottom: 5mm; }
+.fix-item { display: flex; align-items: center; gap: 3mm; background: var(--fail-bg); border: 1pt solid #fca5a5; border-radius: 4pt; padding: 2.5mm 3mm; margin-bottom: 2mm; }
+.fix-num { font-size: 11pt; font-weight: 900; color: var(--fail); width: 8mm; text-align: center; }
+.fix-name { font-size: 8.5pt; font-weight: 700; color: var(--fail); flex: 1; }
+.fix-cat { font-size: 7pt; color: rgba(153,27,27,.7); text-transform: uppercase; }
+
+/* ── ELEMENT ROWS ── */
+.el { border: 1pt solid var(--border); border-radius: 4pt; margin-bottom: 3mm; page-break-inside: avoid; background: #fff; }
+.el-head { display: flex; align-items: center; gap: 3mm; padding: 3mm 4mm; border-bottom: 1pt solid var(--border); background: #fafcf5; }
+.el-name { font-size: 9pt; font-weight: 700; flex: 1; }
+.el-bar-wrap { width: 28mm; background: #e8edd8; border-radius: 2pt; height: 5pt; }
+.el-bar { height: 5pt; border-radius: 2pt; }
+.el-score { font-size: 9pt; font-weight: 800; width: 14mm; text-align: right; }
+.el-score.pass { color: var(--pass); }
+.el-score.warn { color: var(--warn); }
+.el-score.fail { color: var(--fail); }
+.el-score.na { color: var(--muted); }
+.el-body { padding: 3mm 4mm; }
+.el-stat { font-size: 8.5pt; color: #1a1a1a; margin-bottom: 2mm; }
+.el-rec { font-size: 8pt; background: #f2fae5; border-left: 2pt solid var(--lime); padding: 2mm 3mm; margin-bottom: 2mm; border-radius: 0 3pt 3pt 0; }
+.el-rec strong { display: block; font-size: 6.5pt; text-transform: uppercase; letter-spacing: .06em; color: var(--green); margin-bottom: 0.5mm; }
+.el-guide { font-size: 7.5pt; color: var(--muted); border: 1pt solid var(--border); padding: 2mm 3mm; border-radius: 3pt; }
+.el-guide strong { display: block; font-size: 6.5pt; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin-bottom: 0.5mm; }
+.ev-link { font-size: 7.5pt; color: var(--green); display: block; margin-top: 1.5mm; }
+
+/* ── BADGES ── */
+.badge { display: inline-block; padding: 1pt 5pt; border-radius: 8pt; font-size: 7pt; font-weight: 700; }
+.badge.pass { background: var(--pass-bg); color: var(--pass); }
+.badge.warn { background: var(--warn-bg); color: var(--warn); }
+.badge.fail { background: var(--fail-bg); color: var(--fail); }
+.badge.na { background: #f1f5f9; color: var(--muted); }
+
+/* ── URL TABLE ── */
+.url-table { width: 100%; border-collapse: collapse; margin: 2mm 0; font-size: 7.5pt; }
+.url-table th { text-align: left; padding: 2mm 3mm; background: var(--bg); color: var(--muted); font-weight: 600; border-bottom: 1pt solid var(--border); }
+.url-table td { padding: 1.5mm 3mm; border-bottom: 1pt solid #edf2e4; word-break: break-all; }
+
+/* ── SCREENSHOTS ── */
+.sc-grid { display: flex; gap: 4mm; margin-top: 4mm; }
+.sc-card { flex: 1; border: 1pt solid var(--border); border-radius: 4pt; overflow: hidden; }
+.sc-label { padding: 2mm 3mm; font-size: 7pt; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); background: var(--bg); }
+.sc-card img { width: 100%; display: block; max-height: 90mm; object-fit: cover; object-position: top; }
+.sc-empty { background: #f0f4e8; height: 50mm; display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 8pt; }
+
+/* ── FAQ METHODOLOGY ── */
+.faq-item { border: 1pt solid var(--border); border-radius: 4pt; padding: 3mm 4mm; margin-bottom: 2.5mm; }
+.faq-q { font-size: 9pt; font-weight: 700; color: var(--green); margin-bottom: 1mm; }
+.faq-a { font-size: 8.5pt; color: var(--muted); }
+
+/* ── HELPERS ── */
+.pb { page-break-after: always; }
+.no-break { page-break-inside: avoid; }
+</style>
+</head>
+<body>
+
+{# ── COVER ── #}
+<div class="cover">
+  <div class="cover-kicker">SEO Audit Report</div>
+  <div class="cover-domain">{{ job.site_name }}</div>
+  <div class="cover-url">{{ job.url }}</div>
+
+  <div class="cover-score-block">
+    {% set ov = scores.overall %}
+    <div class="cover-score">{{ ov|int if ov else "—" }}</div>
+    <div class="cover-score-label">Overall SEO Score out of 100</div>
+  </div>
+
+  <div class="cover-cats">
+    {% for key, label, w in [("on_site","On-site SEO","26%"), ("indexing","Indexing","12%"), ("linking_social","Linking & Social","62%")] %}
+    {% set v = scores.get(key) %}
+    <div class="cover-cat-row">
+      <div class="cover-cat-name">{{ label }}</div>
+      <div class="cover-cat-bar-bg"><div class="cover-cat-bar" style="width:{{ v|int if v else 0 }}%;"></div></div>
+      <div class="cover-cat-val">{{ v|int if v else "—" }}</div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <div class="cover-meta-row">
+    <div class="cover-meta-item"><strong>{{ job.date }}</strong>Report date</div>
+    <div class="cover-meta-item"><strong>{{ job.pages_crawled }}</strong>Pages checked</div>
+    <div class="cover-meta-item"><strong>Baheesa Fatima</strong>Prepared by</div>
+    <div class="cover-meta-item"><strong>baheesafatima.com</strong>Local SEO Consultant</div>
+  </div>
+</div>
+
+{# ── TOC ── #}
+<div class="toc-page">
+  <div class="toc-title">Table of Contents</div>
+  <div class="toc-entry"><span class="toc-num">1</span><span class="toc-label">Overview &amp; Scores</span></div>
+  <div class="toc-entry"><span class="toc-num">2</span><span class="toc-label">On-site SEO</span></div>
+  <div class="toc-sub">Page titles · Meta descriptions · Headings · Content · Images · Speed · Schema · AI Readiness · Code</div>
+  <div class="toc-entry"><span class="toc-num">3</span><span class="toc-label">Indexing</span></div>
+  <div class="toc-sub">Sitemap · Robots.txt · Broken links · Redirects · Duplicate content</div>
+  <div class="toc-entry"><span class="toc-num">4</span><span class="toc-label">Linking &amp; Social</span></div>
+  <div class="toc-sub">Backlinks · Domain authority · Social media</div>
+  <div class="toc-entry"><span class="toc-num">5</span><span class="toc-label">Screenshots</span></div>
+  <div class="toc-entry"><span class="toc-num">6</span><span class="toc-label">How We Check</span></div>
+</div>
+
+{# ── ELEMENT MACRO ── #}
+{% macro el(key, title, evidence_url=None) %}
+{% set e = scores.elements.get(key, {}) %}
+{% set s = e.get("score") %}
+{% set d = e.get("details", {}) %}
+{% if s is not none %}
+  {% if s >= 7 %}{% set cls = "pass" %}{% set bar_color = "#4ade80" %}
+  {% elif s >= 4 %}{% set cls = "warn" %}{% set bar_color = "#facc15" %}
+  {% else %}{% set cls = "fail" %}{% set bar_color = "#f87171" %}{% endif %}
+  {% set bar_w = (s / 10 * 100)|int %}
+{% else %}
+  {% set cls = "na" %}{% set bar_color = "#e0e0e0" %}{% set bar_w = 0 %}
+{% endif %}
+<div class="el no-break">
+  <div class="el-head">
+    <div class="el-name">{{ title }}</div>
+    <div class="el-bar-wrap"><div class="el-bar" style="width:{{ bar_w }}%; background:{{ bar_color }};"></div></div>
+    <div class="el-score {{ cls }}">{{ s ~ " / 10" if s is not none else "N/A" }}</div>
+  </div>
+  <div class="el-body">
+    <div class="el-stat">
+      {%- if d.get("note") -%}{{ d.note }}
+      {%- elif key == "title_tags" -%}
+        {{ d.get("total",0) }} pages checked.{%- if d.get("missing",0) %} {{ d.missing }} have no title.{%- endif %}{%- if d.get("too_long",0) %} {{ d.too_long }} titles over 60 characters.{%- endif %}{%- if d.get("too_short",0) %} {{ d.too_short }} titles under 30 characters.{%- endif %}{%- if d.get("duplicates",0) %} {{ d.duplicates }} duplicate titles.{%- endif %}{%- if not d.get("missing") and not d.get("too_long") and not d.get("too_short") and not d.get("duplicates") %} All titles look good.{%- endif %}
+      {%- elif key == "meta_descriptions" -%}
+        {{ d.get("total",0) }} pages checked.{%- if d.get("missing",0) %} {{ d.missing }} missing meta descriptions.{%- endif %}{%- if d.get("too_long",0) %} {{ d.too_long }} over 155 characters.{%- endif %}{%- if not d.get("missing") and not d.get("too_long") %} All descriptions look good.{%- endif %}
+      {%- elif key == "heading_tags" -%}
+        {{ d.get("total",0) }} pages checked.{%- if d.get("missing_h1",0) %} {{ d.missing_h1 }} pages missing an H1.{%- endif %}{%- if d.get("multiple_h1",0) %} {{ d.multiple_h1 }} pages with multiple H1s.{%- endif %}{%- if d.get("duplicate_h1",0) %} {{ d.duplicate_h1 }} duplicate H1 texts.{%- endif %}{%- if not d.get("missing_h1") and not d.get("multiple_h1") and not d.get("duplicate_h1") %} All headings look good.{%- endif %}
+      {%- elif key == "image_alts" -%}
+        {%- set missing = d.get("missing_alt",0) -%}{{ d.get("total_images","?") }} images checked.{%- if missing %} {{ missing }} missing ALT text.{%- else %} All images have ALT text.{%- endif %}
+      {%- elif key == "content" or d.thin_pages is defined -%}
+        {%- set avg = d.get("avg_word_count") -%}{%- set thin = d.get("thin_pages") -%}Average {{ avg if avg is not none else "?" }} words per page.{%- if thin is not none and thin > 0 %} {{ thin }} pages under 300 words.{%- elif thin == 0 %} All pages have sufficient content.{%- endif %}
+      {%- elif key == "broken_links" or d.broken_count is defined -%}
+        {%- set bc = d.get("broken_count",0) -%}{%- if bc == 0 %}No broken links found.{%- else %}{{ bc }} broken link{{ "s" if bc != 1 }} (404 errors) found.{%- endif %}
+      {%- elif key == "internal_linking" or d.avg_internal_links is defined -%}
+        Average {{ d.get("avg_internal_links","?") }} internal links per page.{%- if d.get("pages_with_none",0) %} {{ d.pages_with_none }} pages have no internal links.{%- endif %}
+      {%- elif key == "nofollow" or d.total_external is defined -%}
+        {{ d.get("nofollow",0) }} nofollow out of {{ d.get("total_external",0) }} external links.
+      {%- elif key == "keyword_focus" or d.pages_missing_focus is defined -%}
+        {{ d.get("pages_checked",0) }} pages checked.{%- if d.get("pages_missing_focus",0) %} {{ d.pages_missing_focus }} pages lack clear keyword focus.{%- else %} All pages have clear keyword focus.{%- endif %}
+      {%- elif key == "url_structure" or d.poor_url_structure is defined -%}
+        {{ d.get("total",0) }} URLs checked.{%- if d.get("poor_url_structure",0) %} {{ d.poor_url_structure }} have poor structure.{%- else %} All URLs are clean.{%- endif %}
+      {%- elif key == "code_validation" or d.errors is defined -%}
+        {{ d.get("errors",0) }} HTML errors and {{ d.get("warnings",0) }} warnings (homepage only).
+      {%- elif d.get("lcp") -%}
+        Speed score: {{ d.get("performance","—") }}/100. LCP: {{ d.lcp }}.
+      {%- elif d.types_found is defined -%}
+        Schema types: {{ d.types_found | join(", ") or "None" }}.{%- if d.get("missing_types") %} Missing: {{ d.missing_types | join(", ") }}.{%- endif %}
+      {%- elif d.profiles_found is defined -%}
+        {{ d.get("profiles_found",0) }} social profile{{ "s" if d.get("profiles_found",0) != 1 }} found.
+      {%- elif d.redirects_302 is defined or d.redirect_count is defined -%}
+        {%- set rc = d.get("redirects_302", d.get("redirect_count",0)) -%}{{ rc }} temporary (302) redirect{{ "s" if rc != 1 }}.
+      {%- elif d -%}
+        {% for k2, v2 in d.items() %}{{ k2 | replace("_"," ") | capitalize }}: {{ v2 }}. {% endfor %}
+      {%- else -%}No data.{%- endif -%}
+    </div>
+    {% set urls = e.get("affected_urls",[]) %}
+    {% if urls %}
+    <table class="url-table">
+      <tr><th>Affected pages (top 5)</th></tr>
+      {% for u in urls[:5] %}<tr><td>{{ u }}</td></tr>{% endfor %}
+    </table>
+    {% endif %}
+    {% set rec = recommendations.get(key,"") %}
+    {% if rec and s is not none and s < 8 %}
+    <div class="el-rec"><strong>What to do</strong>{{ rec }}</div>
+    {% endif %}
+    {% set guide = guidelines.get(key) %}
+    {% if guide %}
+    <div class="el-guide"><strong>Rule of thumb</strong>{{ guide }}</div>
+    {% endif %}
+    {% if evidence_url %}
+    <div class="ev-link">Check: {{ evidence_url }}</div>
+    {% endif %}
+  </div>
+</div>
+{% endmacro %}
+
+{# ── 1. OVERVIEW ── #}
+<div class="section section-first">
+  <div class="section-header">
+    <h2>1 — Overview &amp; Scores</h2>
+  </div>
+
+  <div class="tiles">
+    {% set ov = scores.overall %}
+    {% set ov_cls = "pass" if ov and ov >= 70 else ("warn" if ov and ov >= 50 else "fail") %}
+    <div class="tile">
+      <div class="tile-num {{ ov_cls }}">{{ ov|int if ov else "—" }}</div>
+      <div class="tile-label">Overall</div>
+    </div>
+    {% for key, label, w in [("on_site","On-site","26% of total"),("indexing","Indexing","12% of total"),("linking_social","Linking & Social","62% of total")] %}
+    {% set v = scores.get(key) %}
+    {% set cls = "pass" if v and v >= 70 else ("warn" if v and v >= 50 else "fail") %}
+    <div class="tile">
+      <div class="tile-num {{ cls }}">{{ v|int if v else "—" }}</div>
+      <div class="tile-label">{{ label }}</div>
+      <div class="tile-note">{{ w }}</div>
+    </div>
+    {% endfor %}
+  </div>
+
+  {% if scores.fix_first %}
+  <h3>Fix These First</h3>
+  <p>These elements scored 3 or below and need immediate attention.</p>
+  <div class="fix-list">
+    {% for item in scores.fix_first %}
+    <div class="fix-item no-break">
+      <div class="fix-num">{{ item.score }}</div>
+      <div>
+        <div class="fix-name">{{ item.element | replace("_"," ") | title }}</div>
+        <div class="fix-cat">{{ item.category | replace("_"," ") | title }}</div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+</div>
+
+{# ── 2. ON-SITE ── #}
+<div class="section">
+  <div class="section-header">
+    <h2>2 — On-site SEO</h2>
+    <div class="section-score">Score: {{ scores.on_site|int if scores.on_site else "—" }} / 100</div>
+  </div>
+  <p>Everything on your own website that directly affects how Google reads and ranks your pages.</p>
+  {{ el("keyword_focus", "Keyword Focus") }}
+  {{ el("url_structure", "URL Structure") }}
+  {{ el("title_tags", "Page Titles") }}
+  {{ el("meta_descriptions", "Meta Descriptions") }}
+  {{ el("heading_tags", "Headings (H1, H2…)") }}
+  {{ el("content", "Content Length") }}
+  {{ el("internal_linking", "Internal Links") }}
+  {{ el("image_alts", "Image ALT Text") }}
+  {{ el("nofollow", "Nofollow Links") }}
+  {{ el("page_load_speed", "Page Speed", evidence_url="https://pagespeed.web.dev/analysis?url=" ~ job.url) }}
+  {{ el("schema", "Structured Data (Schema)", evidence_url="https://validator.schema.org/#url=" ~ job.url) }}
+  {{ el("ai_optimization", "AI Readiness") }}
+  {{ el("code_validation", "Code Quality", evidence_url="https://validator.w3.org/nu/?doc=" ~ job.url) }}
+</div>
+
+{# ── 3. INDEXING ── #}
+<div class="section">
+  <div class="section-header">
+    <h2>3 — Indexing</h2>
+    <div class="section-score">Score: {{ scores.indexing|int if scores.indexing else "—" }} / 100</div>
+  </div>
+  <p>How well Google can find, read, and index all your pages.</p>
+  {{ el("indexing_optimization", "Sitemap &amp; Robots.txt") }}
+  {{ el("page_exclusions", "Pages Blocked from Google") }}
+  {{ el("page_inclusions", "Pages Visible to Google") }}
+  {{ el("url_redirects", "Page Redirects") }}
+  {{ el("duplicate_content", "Duplicate Pages") }}
+  {{ el("broken_links", "Broken Links (404 Errors)") }}
+</div>
+
+{# ── 4. LINKING & SOCIAL ── #}
+<div class="section">
+  <div class="section-header">
+    <h2>4 — Linking &amp; Social</h2>
+    <div class="section-score">Score: {{ scores.linking_social|int if scores.linking_social else "—" }} / 100</div>
+  </div>
+  <p>How many other websites link to you, and your social media presence.</p>
+
+  {% if backlinks.available %}
+  <div class="el no-break" style="margin-bottom:3mm;">
+    <div class="el-head"><div class="el-name">Backlink Overview (Common Crawl)</div></div>
+    <div class="el-body">
+      <div class="el-stat">{{ backlinks.note }}</div>
+    </div>
+  </div>
+  {% endif %}
+
+  {{ el("linking_root_domains", "Websites Linking to You") }}
+  {{ el("inbound_followed_links", "Followed Backlinks") }}
+  {{ el("authority_trust", "Domain Authority") }}
+  {{ el("social_media", "Social Media Presence") }}
+</div>
+
+{# ── 5. SCREENSHOTS ── #}
+<div class="section">
+  <div class="section-header">
+    <h2>5 — Screenshots</h2>
+  </div>
+  {% if screenshots.available and screenshots.screenshots %}
+  <div class="sc-grid">
+    {% for s in screenshots.screenshots %}
+    <div class="sc-card">
+      <div class="sc-label">{{ s.type | title }} view</div>
+      {% if s.get("data_uri") %}
+        <img src="{{ s.data_uri }}" alt="{{ s.type }} screenshot">
+      {% elif s.get("path") %}
+        <img src="{{ s.path }}" alt="{{ s.type }} screenshot">
+      {% else %}
+        <div class="sc-empty">Screenshot unavailable</div>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p>Screenshots could not be captured.</p>
+  {% endif %}
+</div>
+
+{# ── 6. HOW WE CHECK ── #}
+<div class="section">
+  <div class="section-header">
+    <h2>6 — How We Check</h2>
+  </div>
+  <div class="faq-item no-break"><div class="faq-q">What does "On-site" cover?</div><div class="faq-a">Everything on your own website — page titles, descriptions, headings, images, speed, and code quality. These are things you (or your developer) can fix directly.</div></div>
+  <div class="faq-item no-break"><div class="faq-q">What does "Indexing" mean?</div><div class="faq-a">Whether Google can find and read your pages. We check your sitemap, robots.txt, broken pages, redirects, and duplicate content.</div></div>
+  <div class="faq-item no-break"><div class="faq-q">What is "Linking &amp; Social"?</div><div class="faq-a">Other websites linking to yours and your social media presence. This takes time and outreach to improve.</div></div>
+  <div class="faq-item no-break"><div class="faq-q">Where does backlink data come from?</div><div class="faq-a">We use Common Crawl, a free public index of the web. It gives a partial picture — for a full backlink report, tools like Ahrefs or Semrush are needed.</div></div>
+  <div class="faq-item no-break"><div class="faq-q">What is Domain Authority?</div><div class="faq-a">A score that predicts how well your site ranks. It requires paid tools (Moz, Ahrefs) so we cannot include it here.</div></div>
+  <div class="faq-item no-break"><div class="faq-q">What is AI Readiness?</div><div class="faq-a">How well your content is structured for AI tools like ChatGPT and Google AI Overviews — Schema markup, FAQ sections, and clear question-and-answer formats.</div></div>
+  <div class="faq-item no-break"><div class="faq-q">What is Structured Data (Schema)?</div><div class="faq-a">Hidden code that tells Google what your page is about. Good Schema can earn you star ratings or FAQ answers shown directly in Google search results.</div></div>
+  <p style="margin-top:6mm; font-size:8pt; color:#aaa;">Prepared by Baheesa Fatima · baheesafatima.com · Local SEO Consultant</p>
+</div>
+
+</body>
+</html>

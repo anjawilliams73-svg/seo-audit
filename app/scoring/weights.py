@@ -38,7 +38,5 @@ ELEMENTS = {
         "inbound_followed_links",
         "authority_trust",
         "social_media",
-        "competitive_link_comparison",
-        "nap",
     ],
 }

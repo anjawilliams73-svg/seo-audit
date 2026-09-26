@@ -100,8 +100,6 @@ async def run(
         "inbound_followed_links":     rules.score_inbound_links(backlinks_data),
         "authority_trust":            rules.score_authority_trust(backlinks_data),
         "social_media":               rules.score_social_media(social_data),
-        "competitive_link_comparison":rules.score_competitive_link_comparison(backlinks_data),
-        "nap":                        rules.score_nap(nap_data),
     }
 
     scores = rules.aggregate(element_scores)

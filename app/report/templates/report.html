@@ -140,7 +140,7 @@ p { color: var(--muted); font-size: 13px; margin-bottom: 6px; }
 .el-rec strong { display: block; font-size: 10px; text-transform: uppercase; letter-spacing: .07em; color: var(--green); margin-bottom: 3px; font-weight: 700; }
 .el-guide { font-size: 12px; color: var(--muted); background: #fff; border: 1px solid var(--border); padding: 8px 12px; border-radius: 7px; margin-top: 6px; }
 .el-guide strong { display: block; font-size: 10px; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); margin-bottom: 3px; }
-.ev-link { font-size: 11px; color: var(--green); font-weight: 600; display: inline-block; margin-top: 8px; }
+.ev-btn { display: inline-block; margin-top: 10px; padding: 6px 14px; background: var(--green); color: #fff; font-size: 11px; font-weight: 700; border-radius: 6px; text-decoration: none; letter-spacing: .02em; }
 
 /* ── URL TABLE ── */
 .url-table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 11px; }
@@ -178,9 +178,21 @@ p { color: var(--muted); font-size: 13px; margin-bottom: 6px; }
 
 /* ── MOBILE ── */
 @media (max-width: 600px) {
+  .cover-inner { padding: 28px 16px 24px; }
+  .cover-body { grid-template-columns: 1fr; gap: 20px; }
+  .cover-ring svg { width: 100px; height: 100px; }
+  .ring-num { font-size: 26px; }
+  .ring-label { font-size: 10px; }
+  .cover-meta { gap: 16px; }
   .tab-panel { padding: 16px 14px 40px; }
-  .el-bar-wrap { width: 56px; }
+  .el-bar-wrap { width: 50px; }
+  .el-name { font-size: 12px; }
   .ov-grid { grid-template-columns: 1fr 1fr; }
+  .ov-tile-score { font-size: 1.9rem; }
+  .cat-detail-score { font-size: 20px; }
+  .cat-detail-items { gap: 4px; }
+  .cat-el-badge { font-size: 10px; }
+  h2 { font-size: 13px; }
 }
 </style>
 </head>
@@ -195,7 +207,6 @@ p { color: var(--muted); font-size: 13px; margin-bottom: 6px; }
 <div class="cover-inner">
   <p class="cover-kicker">SEO Audit Report</p>
   <div class="cover-domain">{{ job.site_name }}</div>
-  <div class="cover-url">{{ job.url }}</div>
 
   <div class="cover-body">
     <div class="cover-ring-wrap">
@@ -357,7 +368,7 @@ p { color: var(--muted); font-size: 13px; margin-bottom: 6px; }
     <div class="el-guide"><strong>Rule of thumb</strong>{{ guide }}</div>
     {% endif %}
     {% if evidence_url %}
-    <a class="ev-link" href="{{ evidence_url }}" target="_blank">Check this yourself →</a>
+    <a class="ev-btn" href="{{ evidence_url }}" target="_blank">&#8599; Check live data</a>
     {% endif %}
   </div>
 </div>

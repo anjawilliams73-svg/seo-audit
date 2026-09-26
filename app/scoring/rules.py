@@ -113,7 +113,12 @@ def score_page_load_speed(psi_data: dict) -> dict[str, Any]:
         return {"score": None, "details": {"note": "Not available — PageSpeed API not reached."}, "affected_urls": []}
     homepage_result = next(iter(psi_data.values()), {})
     if homepage_result.get("error"):
-        return {"score": None, "details": {"note": f"PSI error: {homepage_result['error']}"}, "affected_urls": []}
+        err = homepage_result["error"]
+        if "rate_limited" in err or "empty_response" in err or "429" in err:
+            note = "PageSpeed API quota exceeded. Add or check your PAGESPEED_API_KEY in Railway Variables."
+        else:
+            note = f"PageSpeed error: {err}"
+        return {"score": None, "details": {"note": note}, "affected_urls": []}
     lcp = homepage_result.get("lcp", {})
     lcp_score = lcp.get("score")
     if lcp_score is None:

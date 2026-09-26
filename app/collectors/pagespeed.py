@@ -1,36 +1,44 @@
 """PageSpeed Insights collector — mobile strategy, up to 6 pages."""
 from __future__ import annotations
 
+import logging
 import os
 from typing import Any
+from urllib.parse import quote_plus
 
 import httpx
 
 _PSI = "https://www.googleapis.com/pagespeedonline/v5/runPagespeed"
 _PAGES_TO_TEST = 6
+log = logging.getLogger(__name__)
 
 
 async def collect(urls: list[str]) -> dict[str, Any]:
-    key = os.getenv("PAGESPEED_API_KEY", "")
+    key = (os.getenv("PAGESPEED_API_KEY") or "").strip()
+    if key:
+        log.info("PSI: using API key (len=%d)", len(key))
+    else:
+        log.warning("PSI: no API key — keyless quota applies")
     results: dict[str, Any] = {}
 
-    async with httpx.AsyncClient(timeout=30) as client:
+    async with httpx.AsyncClient(timeout=45) as client:
         for url in urls[:_PAGES_TO_TEST]:
-            params: dict[str, str] = {"url": url, "strategy": "mobile"}
-            if key:
-                params["key"] = key
-            for cat in ("performance", "seo", "accessibility", "best-practices"):
-                params.setdefault("category", cat)
-            # build proper multi-category query string
-            qs = f"url={httpx.URL(url)}&strategy=mobile"
+            qs = f"url={quote_plus(url)}&strategy=mobile"
             for cat in ("performance", "seo", "accessibility", "best-practices"):
                 qs += f"&category={cat}"
             if key:
                 qs += f"&key={key}"
             try:
                 r = await client.get(f"{_PSI}?{qs}")
+                log.info("PSI %s → HTTP %d", url, r.status_code)
                 if r.status_code == 200:
-                    results[url] = _parse(r.json())
+                    parsed = _parse(r.json())
+                    # Detect empty response (quota hit returns 200 with no lighthouse data)
+                    if parsed.get("performance") is None and parsed.get("lcp", {}).get("value") is None:
+                        err_body = r.json().get("error", {})
+                        results[url] = {"error": f"empty_response: {err_body.get('message','no lighthouse data')}"}
+                    else:
+                        results[url] = parsed
                 elif r.status_code == 429:
                     results[url] = {"error": "rate_limited"}
                 else:

@@ -12,5 +12,6 @@ def render(html_path: Path) -> Path:
         raise RuntimeError("WeasyPrint is not installed. Run: pip install weasyprint")
 
     pdf_path = html_path.with_suffix(".pdf")
-    WP_HTML(filename=str(html_path)).write_pdf(str(pdf_path))
+    pdf_bytes = WP_HTML(filename=str(html_path)).write_pdf()
+    pdf_path.write_bytes(pdf_bytes)
     return pdf_path

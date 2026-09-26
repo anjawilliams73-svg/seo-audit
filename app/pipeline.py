@@ -122,14 +122,18 @@ async def run(
         output_path=html_path,
     )
 
-    pdf_path = render_pdf.render(html_path)
+    try:
+        pdf_path = render_pdf.render(html_path)
+        pdf_path_str = str(pdf_path)
+    except Exception:
+        pdf_path_str = None
 
     return {
         "job_id": job_id,
         "status": "complete",
         "scores": scores,
         "html_path": str(html_path),
-        "pdf_path": str(pdf_path),
+        "pdf_path": pdf_path_str,
         "pages_crawled": len(pages),
         "gbp": gbp_data,
         "nap": nap_data,

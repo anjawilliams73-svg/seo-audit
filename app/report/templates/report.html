@@ -243,7 +243,7 @@ p { color: var(--muted); font-size: 13px; margin-bottom: 6px; }
   <button class="tab-btn" onclick="showTab('linking',this)">Linking &amp; Social</button>
   <button class="tab-btn" onclick="showTab('guidelines',this)">Guidelines</button>
   <button class="tab-btn" onclick="showTab('methodology',this)">How we check</button>
-  <a class="tab-btn pdf-btn" href="/report/{{ job.id }}/pdf" target="_blank" style="margin-left:auto; color:var(--green); text-decoration:none; display:flex; align-items:center; gap:5px;">&#8595; PDF</a>
+  <a href="/report/{{ job.id }}/pdf" target="_blank" style="margin-left:auto; align-self:center; background:var(--green); color:#fff; font-size:11px; font-weight:700; padding:7px 14px; border-radius:6px; text-decoration:none; white-space:nowrap; letter-spacing:.03em; flex-shrink:0;">&#8595; Download PDF</a>
 </div>
 
 {# ── ELEMENT MACRO ── #}
@@ -324,8 +324,11 @@ p { color: var(--muted); font-size: 13px; margin-bottom: 6px; }
         {%- set missing = d.get("common_missing", []) -%}
         AI readiness score: <strong>{{ d.get("site_score", "?") }}/100</strong>.
         {%- if missing %} Commonly missing: {{ missing | join(", ") }}.{%- else %} No common AI readiness issues found.{%- endif %}
-      {%- elif d.profiles_found is defined -%}
-        {{ d.get("profiles_found",0) }} social profile{{ "s" if d.get("profiles_found",0) != 1 }} found.
+      {%- elif key == "social_media" or d.profiles_found is defined -%}
+        {%- set pf = d.get("profiles_found", 0) -%}
+        {%- set platforms = d.get("platforms", []) -%}
+        {%- if pf == 0 %}No social media profiles found linked from the site.
+        {%- else %}{{ pf }} social profile{{ "s" if pf != 1 }} found{% if platforms %}: {{ platforms | join(", ") }}{% endif %}.{%- if d.get("inactive", 0) %} {{ d.inactive }} appear{{ "s" if d.inactive == 1 }} inactive.{%- endif %}{%- endif %}
       {%- elif d.redirects_302 is defined or d.redirect_count is defined -%}
         {%- set rc = d.get("redirects_302", d.get("redirect_count",0)) -%}
         {{ rc }} temporary (302) redirect{{ "s" if rc != 1 }}.

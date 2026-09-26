@@ -47,33 +47,61 @@ def _base(url: str) -> str:
 
 
 async def _fetch_robots_and_sitemap(base: str) -> tuple[str, list[str]]:
-    sitemap_urls: list[str] = []
+    """Return (robots_text, list_of_page_urls_from_all_sitemaps)."""
+    page_urls: list[str] = []
     robots_text = ""
+    index_sm_urls: list[str] = []
+
     try:
-        async with httpx.AsyncClient(timeout=10, follow_redirects=True) as c:
+        async with httpx.AsyncClient(timeout=15, follow_redirects=True) as c:
+            # 1. robots.txt
             r = await c.get(f"{base}/robots.txt")
             if r.status_code == 200:
                 robots_text = r.text
-                # extract Sitemap directives
                 for line in robots_text.splitlines():
                     if line.strip().lower().startswith("sitemap:"):
-                        sm_url = line.split(":", 1)[1].strip()
-                        sitemap_urls.append(sm_url)
+                        index_sm_urls.append(line.split(":", 1)[1].strip())
 
-            if not sitemap_urls:
-                # try default location
+            # 2. fallback to /sitemap.xml if robots.txt had no Sitemap directive
+            if not index_sm_urls:
                 r2 = await c.get(f"{base}/sitemap.xml")
                 if r2.status_code == 200:
-                    sitemap_urls.append(f"{base}/sitemap.xml")
-                    sitemap_urls.extend(_extract_sitemap_index(r2.text, base))
+                    index_sm_urls.append(str(r2.url))  # resolved URL after redirect
+
+            # 3. fetch each sitemap/index and collect page URLs
+            visited: set[str] = set()
+            async def _fetch_sm(url: str) -> None:
+                if url in visited:
+                    return
+                visited.add(url)
+                try:
+                    rs = await c.get(url)
+                    if rs.status_code != 200:
+                        return
+                    xml = rs.text
+                    # sitemap index — recurse into child sitemaps
+                    child_sms = re.findall(
+                        r"<sitemap>\s*<loc>\s*(https?://[^\s<]+)\s*</loc>", xml
+                    )
+                    if child_sms:
+                        for child in child_sms:
+                            await _fetch_sm(child)
+                    else:
+                        # regular sitemap — collect <url><loc> entries
+                        urls = re.findall(
+                            r"<url>\s*<loc>\s*(https?://[^\s<]+)\s*</loc>", xml
+                        )
+                        page_urls.extend(urls)
+                except Exception:
+                    pass
+
+            for sm_url in index_sm_urls:
+                await _fetch_sm(sm_url)
+
     except Exception:
         pass
-    return robots_text, sitemap_urls
 
-
-def _extract_sitemap_index(xml: str, base: str) -> list[str]:
-    # sitemap index entries
-    return re.findall(r"<loc>\s*(https?://[^\s<]+)\s*</loc>", xml)
+    return robots_text, page_urls
 
 
 def _analyse_redirects(pages: list[dict]) -> dict[str, list[str]]:

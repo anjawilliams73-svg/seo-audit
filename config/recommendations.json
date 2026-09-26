@@ -1,0 +1,26 @@
+{
+  "title_tags": {
+    "too_long": "{count} pages have titles over 60 characters. Shorten them so search results do not cut them off.",
+    "too_short": "{count} pages have titles under 30 characters. Add the main keyword and a clear description.",
+    "duplicate": "{count} pages share duplicate titles. Rewrite each one to match its page.",
+    "missing": "{count} pages have no title tag. Add one to each."
+  },
+  "meta_descriptions": {
+    "missing": "{count} pages have no meta description. Add a unique one to each, starting with top pages."
+  },
+  "heading_tags": {
+    "missing_h1": "{count} pages have no H1. Add one that states the page topic.",
+    "multiple_h1": "{count} pages have more than one H1. Keep one and change the rest to H2.",
+    "duplicate_h1": "{count} pages share duplicate H1s. Make each one unique."
+  },
+  "image_alts": {
+    "missing_alt": "{count} images have no ALT text. Add short, descriptive ALT text to each.",
+    "oversized": "{count} images are over 200 KB. Compress them or convert to WebP."
+  },
+  "broken_links": { "404": "{count} pages return 404. Redirect them to the closest live page or restore them." },
+  "url_redirects": { "302": "{count} redirects use 302. Change them to 301 if the move is permanent." },
+  "schema": { "missing_types": "The site lacks these schema types: {types}. Add them to the matching pages." },
+  "social_media": { "inactive": "{platform} has had no activity for {days} days. Resume posting at least monthly." },
+  "google_business_profile": { "none": "No Google Business Profile was provided. Create and verify one to appear in local results." },
+  "nap": { "missing": "The site does not show a full business name, address, and phone number. Add them to the footer and contact page." }
+}

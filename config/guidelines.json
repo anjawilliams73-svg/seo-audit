@@ -1,0 +1,15 @@
+{
+  "title_tags": "Keep titles between 30 and 60 characters. Put the main keyword near the start. Make every title unique.",
+  "meta_descriptions": "Keep descriptions between 70 and 155 characters. Summarize the page and give a reason to click. Make each one unique.",
+  "heading_tags": "Use one H1 per page. Keep it unique and under 70 characters. Use H2 and H3 in order to structure sections.",
+  "image_alts": "Add ALT text that describes each image. Keep images under 200 KB. Use modern formats like WebP.",
+  "page_load_speed": "Aim for LCP under 2.5 seconds. Compress images, defer scripts, and enable caching.",
+  "schema": "Add Organization schema sitewide. Add Product, Article, Breadcrumb, and FAQ schema where they fit. Name every item.",
+  "url_redirects": "Use 301 redirects for permanent moves. Pick one domain version and redirect the others to it.",
+  "broken_links": "Fix or redirect every page that returns 404. Update internal links that point to them.",
+  "duplicate_content": "Keep each page unique. Use canonical tags where near duplicates must exist.",
+  "ai_optimization": "Answer the main question in the first lines of each section. Use question headings, clear authors, dates, and schema.",
+  "social_media": "Post on each active platform at least monthly. Link all profiles from the website.",
+  "google_business_profile": "Create and verify a Google Business Profile. Fill every field and post updates often.",
+  "nap": "Show the business name, address, and phone number on the site. Keep them identical everywhere."
+}

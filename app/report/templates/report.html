@@ -4,149 +4,184 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SEO Audit — {{ job.site_name }}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --green: #354D08; --lime: #d9f99d; --bg: #f5f9ee; --card: #fff;
-    --border: #dde9c4; --text: #1e2a05; --muted: #64748b;
-    --pass: #166534; --pass-bg: #dcfce7;
-    --warn: #854d0e; --warn-bg: #fef9c3;
-    --fail: #991b1b; --fail-bg: #fee2e2;
-    --bar-pass: #4ade80; --bar-warn: #facc15; --bar-fail: #f87171;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--bg); color: var(--text); font-size: 14px; line-height: 1.6; }
-  a { color: var(--green); }
+:root {
+  --green: #2d4008; --lime: #c4f040; --lime-faint: #f3fde8;
+  --bg: #f4f7f0; --card: #fff; --border: #dde9c4;
+  --text: #1a2204; --muted: #6b7280; --subtle: #9ca3af;
+  --pass: #15803d; --pass-bg: #dcfce7; --pass-border: #bbf7d0;
+  --warn: #b45309; --warn-bg: #fef3c7; --warn-border: #fde68a;
+  --fail: #b91c1c; --fail-bg: #fee2e2; --fail-border: #fca5a5;
+  --bar-pass: #22c55e; --bar-warn: #f59e0b; --bar-fail: #ef4444;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Inter', Arial, sans-serif; background: var(--bg); color: var(--text); font-size: 14px; line-height: 1.5; }
+a { color: var(--green); }
 
-  /* ── COVER ── */
-  .cover { background: var(--green); color: #fff; padding: 48px 24px 40px; }
-  .cover-kicker { font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: rgba(217,249,157,.5); margin-bottom: 10px; }
-  .cover-name { font-size: clamp(1.6rem, 5vw, 2.4rem); font-weight: 800; margin-bottom: 4px; }
-  .cover-url { font-size: 13px; color: rgba(255,255,255,.5); margin-bottom: 28px; }
-  .cover-ring-row { display: flex; align-items: center; gap: 28px; flex-wrap: wrap; }
-  .cover-ring { flex-shrink: 0; }
-  .cover-ring svg { width: 120px; height: 120px; }
-  .ring-bg { fill: none; stroke: rgba(255,255,255,.15); stroke-width: 10; }
-  .ring-fg { fill: none; stroke: var(--lime); stroke-width: 10; stroke-linecap: round; stroke-dasharray: 314; transform: rotate(-90deg); transform-origin: 50% 50%; transition: stroke-dashoffset .6s; }
-  .ring-text { font-size: 28px; font-weight: 900; fill: #fff; text-anchor: middle; dominant-baseline: central; }
-  .ring-sub { font-size: 10px; fill: rgba(255,255,255,.5); text-anchor: middle; }
-  .cover-cats { display: flex; flex-direction: column; gap: 10px; flex: 1; min-width: 180px; }
-  .cat-row { display: flex; align-items: center; gap: 10px; }
-  .cat-label { font-size: 11px; color: rgba(255,255,255,.6); width: 120px; flex-shrink: 0; }
-  .cat-bar-wrap { flex: 1; background: rgba(255,255,255,.15); border-radius: 4px; height: 8px; }
-  .cat-bar { height: 8px; border-radius: 4px; background: var(--lime); }
-  .cat-val { font-size: 12px; font-weight: 700; color: #fff; width: 32px; text-align: right; flex-shrink: 0; }
-  .cover-meta { margin-top: 24px; display: flex; gap: 20px; flex-wrap: wrap; }
-  .cover-meta-item { font-size: 11px; color: rgba(255,255,255,.5); }
-  .cover-meta-item strong { display: block; font-size: 13px; color: #fff; }
+/* ── COVER ── */
+.cover { background: var(--green); color: #fff; }
+.cover-inner { max-width: 960px; margin: 0 auto; padding: 44px 24px 36px; }
+.cover-kicker { font-size: 10px; letter-spacing: .2em; text-transform: uppercase; color: rgba(196,240,64,.45); margin-bottom: 8px; font-weight: 600; }
+.cover-domain { font-size: clamp(1.5rem, 5vw, 2.2rem); font-weight: 900; letter-spacing: -.02em; margin-bottom: 3px; }
+.cover-url { font-size: 12px; color: rgba(255,255,255,.4); margin-bottom: 32px; }
+.cover-body { display: grid; grid-template-columns: auto 1fr; gap: 40px; align-items: center; }
+@media (max-width: 620px) { .cover-body { grid-template-columns: 1fr; } }
 
-  /* ── TABS ── */
-  .tab-nav { display: flex; background: var(--card); border-bottom: 2px solid var(--border); padding: 0 16px; position: sticky; top: 0; z-index: 200; overflow-x: auto; scrollbar-width: none; box-shadow: 0 2px 8px rgba(0,0,0,.06); }
-  .tab-nav::-webkit-scrollbar { display: none; }
-  .tab-btn { padding: 13px 16px; font-size: 12px; font-weight: 600; color: var(--muted); background: none; border: none; border-bottom: 3px solid transparent; cursor: pointer; white-space: nowrap; margin-bottom: -2px; }
-  .tab-btn:hover { color: var(--green); }
-  .tab-btn.active { color: var(--green); border-bottom-color: var(--green); }
-  .tab-panel { display: none; padding: 20px 16px 40px; max-width: 860px; margin: 0 auto; }
-  .tab-panel.active { display: block; }
+/* Ring chart */
+.cover-ring-wrap { text-align: center; }
+.cover-ring svg { width: 130px; height: 130px; }
+.ring-bg { fill: none; stroke: rgba(255,255,255,.12); stroke-width: 12; }
+.ring-fg { fill: none; stroke: var(--lime); stroke-width: 12; stroke-linecap: round; stroke-dasharray: 314; transform: rotate(-90deg); transform-origin: 50% 50%; }
+.ring-num { font-size: 32px; font-weight: 900; fill: #fff; text-anchor: middle; dominant-baseline: central; font-family: Inter, Arial, sans-serif; }
+.ring-sub { font-size: 10px; fill: rgba(255,255,255,.4); text-anchor: middle; font-family: Inter, Arial, sans-serif; }
+.ring-label { font-size: 11px; color: rgba(255,255,255,.5); margin-top: 6px; letter-spacing: .05em; text-transform: uppercase; font-weight: 600; }
 
-  /* ── SECTION ── */
-  .section { margin-bottom: 24px; }
-  h2 { font-size: 15px; font-weight: 700; color: var(--green); margin-bottom: 14px; padding-bottom: 6px; border-bottom: 2px solid var(--lime); }
-  h3 { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 8px; margin-top: 18px; }
-  p { color: var(--muted); margin-bottom: 6px; }
+/* Category bars */
+.cover-cats { display: flex; flex-direction: column; gap: 12px; }
+.cat-row { display: flex; align-items: center; gap: 12px; }
+.cat-info { width: 150px; flex-shrink: 0; }
+.cat-name { font-size: 12px; font-weight: 600; color: rgba(255,255,255,.8); }
+.cat-weight { font-size: 10px; color: rgba(255,255,255,.35); }
+.cat-bar-track { flex: 1; height: 8px; background: rgba(255,255,255,.12); border-radius: 6px; overflow: hidden; }
+.cat-bar { height: 8px; border-radius: 6px; }
+.cat-score { font-size: 14px; font-weight: 800; color: #fff; width: 30px; text-align: right; flex-shrink: 0; }
+.cover-divider { border: none; border-top: 1px solid rgba(255,255,255,.1); margin: 24px 0 20px; }
+.cover-meta { display: flex; gap: 28px; flex-wrap: wrap; }
+.cover-meta-item { font-size: 11px; color: rgba(255,255,255,.4); }
+.cover-meta-item strong { display: block; font-size: 13px; color: rgba(255,255,255,.9); font-weight: 700; margin-bottom: 1px; }
 
-  /* ── SCORE TILES ── */
-  .score-tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; margin-bottom: 20px; }
-  .score-tile { background: var(--card); border: 1.5px solid var(--border); border-radius: 12px; padding: 14px 10px; text-align: center; }
-  .tile-num { font-size: 2rem; font-weight: 800; line-height: 1; }
-  .tile-num.pass { color: var(--pass); }
-  .tile-num.warn { color: #b45309; }
-  .tile-num.fail { color: var(--fail); }
-  .tile-label { font-size: 10px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin-top: 4px; }
-  .tile-note { font-size: 10px; color: rgba(100,116,139,.6); margin-top: 2px; }
+/* ── TABS ── */
+.tab-nav { background: var(--card); border-bottom: 1px solid var(--border); display: flex; padding: 0 20px; position: sticky; top: 0; z-index: 200; overflow-x: auto; scrollbar-width: none; box-shadow: 0 1px 8px rgba(0,0,0,.07); }
+.tab-nav::-webkit-scrollbar { display: none; }
+.tab-btn { padding: 14px 15px; font-size: 12px; font-weight: 600; color: var(--muted); background: none; border: none; border-bottom: 2px solid transparent; cursor: pointer; white-space: nowrap; margin-bottom: -1px; font-family: inherit; }
+.tab-btn:hover { color: var(--green); }
+.tab-btn.active { color: var(--green); border-bottom-color: var(--lime); }
+.tab-panel { display: none; padding: 24px 20px 56px; max-width: 900px; margin: 0 auto; }
+.tab-panel.active { display: block; }
 
-  /* ── FIX FIRST ── */
-  .fix-list { display: flex; flex-direction: column; gap: 6px; }
-  .fix-item { display: flex; align-items: center; gap: 12px; background: var(--fail-bg); border: 1px solid #fca5a5; border-radius: 8px; padding: 10px 14px; }
-  .fix-num { font-size: 15px; font-weight: 800; color: var(--fail); width: 24px; text-align: center; flex-shrink: 0; }
-  .fix-name { font-size: 12px; font-weight: 600; color: var(--fail); flex: 1; }
-  .fix-cat { font-size: 10px; color: rgba(153,27,27,.6); text-transform: uppercase; }
+/* ── SECTION ── */
+.section { margin-bottom: 28px; }
+h2 { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid var(--lime); letter-spacing: -.01em; }
+h3 { font-size: 13px; font-weight: 700; color: var(--text); margin: 16px 0 8px; }
+p { color: var(--muted); font-size: 13px; margin-bottom: 6px; }
 
-  /* ── ELEMENT ROW ── */
-  .el-list { display: flex; flex-direction: column; gap: 2px; }
-  .el-row { background: var(--card); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
-  .el-head { display: flex; align-items: center; gap: 10px; padding: 12px 14px; cursor: pointer; user-select: none; }
-  .el-head:hover { background: #f8fdf0; }
-  .el-name { font-size: 13px; font-weight: 600; flex: 1; }
-  .el-bar-wrap { width: 90px; background: #e8f0d4; border-radius: 4px; height: 7px; flex-shrink: 0; }
-  .el-bar { height: 7px; border-radius: 4px; }
-  .el-score { font-size: 12px; font-weight: 700; width: 36px; text-align: right; flex-shrink: 0; }
-  .el-score.pass { color: var(--pass); }
-  .el-score.warn { color: #b45309; }
-  .el-score.fail { color: var(--fail); }
-  .el-score.na { color: var(--muted); }
-  .el-chevron { color: var(--muted); font-size: 10px; flex-shrink: 0; transition: transform .2s; }
-  .el-row.open .el-chevron { transform: rotate(180deg); }
-  .el-body { display: none; padding: 0 14px 14px; border-top: 1px solid var(--border); }
-  .el-row.open .el-body { display: block; }
-  .el-stat { font-size: 13px; color: var(--text); margin: 10px 0 4px; }
-  .el-rec { font-size: 13px; background: #f0f9e8; border-left: 3px solid var(--lime); padding: 8px 12px; border-radius: 0 6px 6px 0; margin-top: 8px; }
-  .el-rec strong { display: block; font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--green); margin-bottom: 2px; }
-  .el-guide { font-size: 12px; color: var(--muted); background: #fafafa; border: 1px solid var(--border); padding: 8px 12px; border-radius: 6px; margin-top: 6px; }
-  .el-guide strong { display: block; font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-bottom: 2px; }
-  .ev-link { font-size: 11px; color: var(--green); display: inline-block; margin-top: 6px; }
+/* ── OVERVIEW: score grid ── */
+.ov-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 24px; }
+@media (max-width: 560px) { .ov-grid { grid-template-columns: 1fr 1fr; } }
+.ov-tile { background: var(--card); border: 1.5px solid var(--border); border-radius: 12px; padding: 16px 14px 14px; position: relative; overflow: hidden; }
+.ov-tile::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
+.ov-tile.pass::before { background: var(--bar-pass); }
+.ov-tile.warn::before { background: var(--bar-warn); }
+.ov-tile.fail::before { background: var(--bar-fail); }
+.ov-tile-score { font-size: 2.4rem; font-weight: 900; line-height: 1; letter-spacing: -.03em; }
+.ov-tile-score.pass { color: var(--pass); }
+.ov-tile-score.warn { color: var(--warn); }
+.ov-tile-score.fail { color: var(--fail); }
+.ov-tile-label { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .07em; margin-top: 4px; }
+.ov-tile-note { font-size: 10px; color: var(--subtle); margin-top: 2px; }
 
-  /* ── URL TABLE ── */
-  .url-table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 11px; }
-  .url-table th { text-align: left; padding: 5px 8px; background: var(--bg); font-weight: 600; color: var(--muted); border-bottom: 1px solid var(--border); }
-  .url-table td { padding: 4px 8px; border-bottom: 1px solid #edf2e4; word-break: break-all; }
+/* Overview: category detail rows */
+.cat-detail { background: var(--card); border: 1.5px solid var(--border); border-radius: 12px; padding: 16px 18px; margin-bottom: 10px; }
+.cat-detail-head { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+.cat-detail-name { font-size: 14px; font-weight: 700; flex: 1; }
+.cat-detail-score { font-size: 24px; font-weight: 900; letter-spacing: -.03em; }
+.cat-detail-score.pass { color: var(--pass); }
+.cat-detail-score.warn { color: var(--warn); }
+.cat-detail-score.fail { color: var(--fail); }
+.cat-detail-bar-track { height: 6px; background: #eef2e6; border-radius: 4px; overflow: hidden; margin-bottom: 10px; }
+.cat-detail-bar { height: 6px; border-radius: 4px; }
+.cat-detail-items { display: flex; flex-wrap: wrap; gap: 6px; }
+.cat-el-badge { display: flex; align-items: center; gap: 5px; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 4px 8px; font-size: 11px; }
+.cat-el-badge .dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.cat-el-badge.pass .dot { background: var(--bar-pass); }
+.cat-el-badge.warn .dot { background: var(--bar-warn); }
+.cat-el-badge.fail .dot { background: var(--bar-fail); }
+.cat-el-badge.na .dot { background: #ccc; }
 
-  /* ── SCREENSHOTS ── */
-  .screenshot-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-  @media (max-width: 560px) { .screenshot-grid { grid-template-columns: 1fr; } }
-  .sc-card { border: 1.5px solid var(--border); border-radius: 10px; overflow: hidden; }
-  .sc-label { padding: 7px 12px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); background: var(--bg); }
-  .sc-card img { width: 100%; display: block; max-height: 380px; object-fit: cover; object-position: top; }
-  .sc-empty { background: #f0f4e8; height: 160px; display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 12px; }
+/* Fix first */
+.fix-section { background: var(--fail-bg); border: 1.5px solid var(--fail-border); border-radius: 12px; padding: 16px 18px; margin-bottom: 24px; }
+.fix-section h3 { margin: 0 0 12px; color: var(--fail); font-size: 13px; }
+.fix-items { display: flex; flex-direction: column; gap: 6px; }
+.fix-item { display: flex; align-items: center; gap: 12px; background: rgba(255,255,255,.6); border-radius: 8px; padding: 9px 12px; }
+.fix-score-badge { width: 34px; height: 34px; border-radius: 8px; background: var(--fail); color: #fff; font-size: 14px; font-weight: 900; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.fix-info { flex: 1; }
+.fix-name { font-size: 12px; font-weight: 700; color: var(--fail); }
+.fix-cat { font-size: 10px; color: rgba(185,28,28,.6); text-transform: uppercase; letter-spacing: .05em; margin-top: 1px; }
+.fix-note { font-size: 11px; color: var(--fail); }
 
-  /* ── BACKLINK BOX ── */
-  .stat-box { background: var(--card); border: 1.5px solid var(--border); border-radius: 10px; padding: 14px; margin-bottom: 12px; }
-  .stat-box p { margin: 0; font-size: 12px; }
+/* ── ELEMENT ROWS ── */
+.el-list { display: flex; flex-direction: column; gap: 4px; }
+.el-row { background: var(--card); border: 1.5px solid var(--border); border-radius: 10px; overflow: hidden; }
+.el-row.open { border-color: #c0daa0; }
+.el-head { display: flex; align-items: center; gap: 10px; padding: 11px 14px; cursor: pointer; user-select: none; }
+.el-head:hover { background: #fafdf5; }
+.el-status { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.el-status.pass { background: var(--bar-pass); }
+.el-status.warn { background: var(--bar-warn); }
+.el-status.fail { background: var(--bar-fail); }
+.el-status.na { background: #d1d5db; }
+.el-name { font-size: 13px; font-weight: 600; flex: 1; }
+.el-bar-wrap { width: 80px; background: #eef2e6; border-radius: 4px; height: 6px; flex-shrink: 0; }
+.el-bar { height: 6px; border-radius: 4px; }
+.el-score { font-size: 12px; font-weight: 800; width: 38px; text-align: right; flex-shrink: 0; }
+.el-score.pass { color: var(--pass); }
+.el-score.warn { color: var(--warn); }
+.el-score.fail { color: var(--fail); }
+.el-score.na { color: var(--muted); }
+.el-chevron { color: var(--subtle); font-size: 9px; flex-shrink: 0; transition: transform .18s; }
+.el-row.open .el-chevron { transform: rotate(180deg); }
+.el-body { display: none; padding: 12px 14px 14px; border-top: 1px solid var(--border); background: #fafcf7; }
+.el-row.open .el-body { display: block; }
+.el-stat { font-size: 13px; color: var(--text); margin-bottom: 8px; line-height: 1.6; }
+.el-rec { font-size: 12.5px; background: #f0fae0; border-left: 3px solid var(--lime); padding: 9px 12px; border-radius: 0 7px 7px 0; margin-top: 8px; }
+.el-rec strong { display: block; font-size: 10px; text-transform: uppercase; letter-spacing: .07em; color: var(--green); margin-bottom: 3px; font-weight: 700; }
+.el-guide { font-size: 12px; color: var(--muted); background: #fff; border: 1px solid var(--border); padding: 8px 12px; border-radius: 7px; margin-top: 6px; }
+.el-guide strong { display: block; font-size: 10px; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); margin-bottom: 3px; }
+.ev-link { font-size: 11px; color: var(--green); font-weight: 600; display: inline-block; margin-top: 8px; }
 
-  /* ── BADGES ── */
-  .badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 10px; font-weight: 700; }
-  .badge.pass { background: var(--pass-bg); color: var(--pass); }
-  .badge.warn { background: var(--warn-bg); color: var(--warn); }
-  .badge.fail { background: var(--fail-bg); color: var(--fail); }
-  .badge.na { background: #f1f5f9; color: var(--muted); }
+/* ── URL TABLE ── */
+.url-table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 11px; }
+.url-table th { text-align: left; padding: 5px 8px; background: var(--bg); font-weight: 600; color: var(--muted); border-bottom: 1px solid var(--border); }
+.url-table td { padding: 4px 8px; border-bottom: 1px solid #edf2e4; word-break: break-all; }
 
-  /* ── FAQ METHODOLOGY ── */
-  .faq { display: flex; flex-direction: column; gap: 10px; }
-  .faq-item { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; }
-  .faq-q { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
-  .faq-a { font-size: 13px; color: var(--muted); }
+/* ── SCREENSHOTS ── */
+.screenshot-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+@media (max-width: 560px) { .screenshot-grid { grid-template-columns: 1fr; } }
+.sc-card { border: 1.5px solid var(--border); border-radius: 10px; overflow: hidden; }
+.sc-label { padding: 8px 12px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); background: var(--bg); border-bottom: 1px solid var(--border); }
+.sc-card img { width: 100%; display: block; max-height: 400px; object-fit: cover; object-position: top; }
+.sc-empty { background: #f0f4e8; height: 160px; display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 12px; }
 
-  /* ── PDF ── */
-  .toc { display: none; padding: 20px; }
-  @media print {
-    .tab-nav { display: none !important; }
-    .tab-panel { display: block !important; padding: 16px; }
-    .el-body { display: block !important; }
-    .toc { display: block; page-break-after: always; }
-    .cover { page-break-after: always; }
-    .section { page-break-inside: avoid; }
-    h2 { bookmark-level: 1; bookmark-label: content(); }
-    @page { margin: 14mm 16mm; @bottom-right { content: "Page " counter(page); font-size: 10px; color: #888; } }
-  }
+/* ── STAT BOX ── */
+.stat-box { background: var(--card); border: 1.5px solid var(--border); border-radius: 10px; padding: 14px 16px; margin-bottom: 12px; }
+.stat-box p { margin: 0; font-size: 12px; }
 
-  /* ── MOBILE ── */
-  @media (max-width: 600px) {
-    .cover { padding: 32px 16px 28px; }
-    .cover-ring svg { width: 90px; height: 90px; }
-    .ring-text { font-size: 22px; }
-    .tab-panel { padding: 14px 12px 32px; }
-    .el-bar-wrap { width: 60px; }
-    .score-tiles { grid-template-columns: 1fr 1fr; }
-  }
+/* ── FAQ ── */
+.faq { display: flex; flex-direction: column; gap: 8px; }
+.faq-item { background: var(--card); border: 1.5px solid var(--border); border-radius: 10px; padding: 13px 15px; }
+.faq-q { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 5px; }
+.faq-a { font-size: 13px; color: var(--muted); line-height: 1.6; }
+
+/* ── PRINT ── */
+.toc { display: none; }
+@media print {
+  .tab-nav { display: none !important; }
+  .tab-panel { display: block !important; padding: 16px; }
+  .el-body { display: block !important; }
+  .cover { page-break-after: always; }
+  .section { page-break-inside: avoid; }
+  @page { margin: 14mm 16mm; @bottom-right { content: "Page " counter(page); font-size: 9px; color: #888; } }
+}
+
+/* ── MOBILE ── */
+@media (max-width: 600px) {
+  .tab-panel { padding: 16px 14px 40px; }
+  .el-bar-wrap { width: 56px; }
+  .ov-grid { grid-template-columns: 1fr 1fr; }
+}
 </style>
 </head>
 <body>
@@ -157,47 +192,48 @@
 
 <!-- COVER -->
 <div class="cover">
+<div class="cover-inner">
   <p class="cover-kicker">SEO Audit Report</p>
-  <div class="cover-name">{{ job.site_name }}</div>
+  <div class="cover-domain">{{ job.site_name }}</div>
   <div class="cover-url">{{ job.url }}</div>
-  <div class="cover-ring-row">
-    <div class="cover-ring">
-      <svg viewBox="0 0 120 120">
-        <circle class="ring-bg" cx="60" cy="60" r="50"/>
-        <circle class="ring-fg" cx="60" cy="60" r="50" style="stroke-dashoffset:{{ dash|round(1) }}"/>
-        <text class="ring-text" x="60" y="56">{{ scores.overall|int if scores.overall else "—" }}</text>
-        <text class="ring-sub" x="60" y="72">out of 100</text>
+
+  <div class="cover-body">
+    <div class="cover-ring-wrap">
+      <svg viewBox="0 0 130 130">
+        <circle class="ring-bg" cx="65" cy="65" r="50"/>
+        <circle class="ring-fg" cx="65" cy="65" r="50" style="stroke-dashoffset:{{ dash|round(1) }}"/>
+        <text class="ring-num" x="65" y="61">{{ scores.overall|int if scores.overall else "—" }}</text>
+        <text class="ring-sub" x="65" y="78">out of 100</text>
       </svg>
+      <div class="ring-label">Overall score</div>
     </div>
+
     <div class="cover-cats">
-      {% for cat, label in [("on_site","On-site"), ("indexing","Indexing"), ("linking_social","Linking & Social")] %}
+      {% for cat, label, weight_pct, bar_bg in [
+        ("on_site","On-site SEO","26%","#86efac"),
+        ("indexing","Indexing","12%","#93c5fd"),
+        ("linking_social","Linking & Social","62%","#c4f040")
+      ] %}
       {% set v = scores.get(cat) %}
       <div class="cat-row">
-        <div class="cat-label">{{ label }}</div>
-        <div class="cat-bar-wrap"><div class="cat-bar" style="width:{{ v|int if v else 0 }}%"></div></div>
-        <div class="cat-val">{{ v|int if v else "—" }}</div>
+        <div class="cat-info">
+          <div class="cat-name">{{ label }}</div>
+          <div class="cat-weight">{{ weight_pct }} of total score</div>
+        </div>
+        <div class="cat-bar-track"><div class="cat-bar" style="width:{{ v|int if v else 0 }}%; background:{{ bar_bg }};"></div></div>
+        <div class="cat-score">{{ v|int if v else "—" }}</div>
       </div>
       {% endfor %}
     </div>
   </div>
+
+  <hr class="cover-divider">
   <div class="cover-meta">
     <div class="cover-meta-item"><strong>{{ job.date }}</strong>Report date</div>
     <div class="cover-meta-item"><strong>{{ job.pages_crawled }}</strong>Pages checked</div>
+    <div class="cover-meta-item"><strong>Baheesa Fatima</strong>Prepared by</div>
   </div>
 </div>
-
-<!-- PDF TOC -->
-<div class="toc">
-  <h2>Contents</h2>
-  <table class="url-table">
-    <tr><th>#</th><th>Section</th></tr>
-    <tr><td>1</td><td><a href="#overview">Overview</a></td></tr>
-    <tr><td>2</td><td><a href="#onsite">On-site</a></td></tr>
-    <tr><td>3</td><td><a href="#indexing">Indexing</a></td></tr>
-    <tr><td>4</td><td><a href="#linking">Linking &amp; Social</a></td></tr>
-    <tr><td>5</td><td><a href="#screenshots">Screenshots</a></td></tr>
-    <tr><td>6</td><td><a href="#methodology">How we check</a></td></tr>
-  </table>
 </div>
 
 <!-- TABS -->
@@ -221,14 +257,15 @@
   {% else %}{% set cls = "fail" %}{% set bar_color = "var(--bar-fail)" %}{% endif %}
   {% set bar_w = (s / 10 * 100)|int %}
 {% else %}
-  {% set cls = "na" %}{% set bar_color = "#e0e0e0" %}{% set bar_w = 0 %}
+  {% set cls = "na" %}{% set bar_color = "#d1d5db" %}{% set bar_w = 0 %}
 {% endif %}
 
 <div class="el-row" onclick="toggleEl(this)">
   <div class="el-head">
+    <div class="el-status {{ cls }}"></div>
     <div class="el-name">{{ title }}</div>
     <div class="el-bar-wrap"><div class="el-bar" style="width:{{ bar_w }}%; background:{{ bar_color }};"></div></div>
-    <div class="el-score {{ cls }}">{{ s ~ "/10" if s is not none else "N/A" }}</div>
+    <div class="el-score {{ cls }}">{{ s ~ " / 10" if s is not none else "N/A" }}</div>
     <div class="el-chevron">▼</div>
   </div>
   <div class="el-body">
@@ -245,49 +282,49 @@
       {%- elif key == "meta_descriptions" -%}
         {{ d.get("total",0) }} pages checked.
         {%- if d.get("missing",0) %} <strong style="color:var(--fail)">{{ d.missing }}</strong> are missing a description (the text that appears under your site name in Google).{%- endif %}
-        {%- if d.get("too_long",0) %} <strong style="color:var(--warn)">{{ d.too_long }}</strong> are too long and will be cut off.{%- endif %}
+        {%- if d.get("too_long",0) %} <strong style="color:var(--warn)">{{ d.too_long }}</strong> are too long and will be cut off in search results.{%- endif %}
         {%- if not d.get("missing") and not d.get("too_long") %} All descriptions look good ✓{%- endif %}
       {%- elif key == "heading_tags" -%}
         {{ d.get("total",0) }} pages checked.
-        {%- if d.get("missing_h1",0) %} <strong style="color:var(--fail)">{{ d.missing_h1 }}</strong> pages have no main heading (H1) — every page needs one.{%- endif %}
-        {%- if d.get("multiple_h1",0) %} <strong style="color:var(--warn)">{{ d.multiple_h1 }}</strong> pages have more than one main heading.{%- endif %}
-        {%- if d.get("duplicate_h1",0) %} <strong style="color:var(--warn)">{{ d.duplicate_h1 }}</strong> pages share the same main heading.{%- endif %}
+        {%- if d.get("missing_h1",0) %} <strong style="color:var(--fail)">{{ d.missing_h1 }}</strong> pages have no main heading (H1).{%- endif %}
+        {%- if d.get("multiple_h1",0) %} <strong style="color:var(--warn)">{{ d.multiple_h1 }}</strong> pages have more than one H1.{%- endif %}
+        {%- if d.get("duplicate_h1",0) %} <strong style="color:var(--warn)">{{ d.duplicate_h1 }}</strong> pages share the same H1 text.{%- endif %}
         {%- if not d.get("missing_h1") and not d.get("multiple_h1") and not d.get("duplicate_h1") %} All headings look good ✓{%- endif %}
       {%- elif key == "image_alts" -%}
         {%- set missing = d.get("missing_alt",0) -%}
         {{ d.get("total_images","?") }} images checked.
-        {%- if missing %} <strong style="color:var(--warn)">{{ missing }}</strong> images have no description (ALT text) — Google can't read images without one.{%- else %} All images have descriptions ✓{%- endif %}
+        {%- if missing %} <strong style="color:var(--warn)">{{ missing }}</strong> are missing ALT text — Google cannot read images without it.{%- else %} All images have ALT text ✓{%- endif %}
       {%- elif key == "content" or d.thin_pages is defined -%}
         {%- set thin = d.get("thin_pages") -%}
         {%- set avg = d.get("avg_word_count") -%}
         Average page has <strong>{{ avg if avg is not none else "?" }}</strong> words.
-        {%- if thin is not none and thin > 0 %} <strong style="color:var(--warn)">{{ thin }}</strong> pages have fewer than 300 words — Google may consider them too thin.{%- elif thin == 0 %} All pages have enough content ✓{%- endif %}
+        {%- if thin is not none and thin > 0 %} <strong style="color:var(--warn)">{{ thin }}</strong> pages have fewer than 300 words.{%- elif thin == 0 %} All pages have enough content ✓{%- endif %}
       {%- elif key == "broken_links" or d.broken_count is defined -%}
         {%- set bc = d.get("broken_count",0) -%}
-        {%- if bc == 0 %}No broken links found ✓{%- else %}<strong style="color:var(--fail)">{{ bc }}</strong> broken link{{ "s" if bc != 1 }} found — these pages return a 404 "not found" error.{%- endif %}
+        {%- if bc == 0 %}No broken links found ✓{%- else %}<strong style="color:var(--fail)">{{ bc }}</strong> broken link{{ "s" if bc != 1 }} found (404 errors).{%- endif %}
       {%- elif key == "internal_linking" or d.avg_internal_links is defined -%}
         Average <strong>{{ d.get("avg_internal_links","?") }}</strong> internal links per page.
-        {%- if d.get("pages_with_none",0) %} <strong style="color:var(--warn)">{{ d.pages_with_none }}</strong> pages have no internal links at all.{%- endif %}
+        {%- if d.get("pages_with_none",0) %} <strong style="color:var(--warn)">{{ d.pages_with_none }}</strong> pages have no internal links.{%- endif %}
       {%- elif key == "nofollow" or d.total_external is defined -%}
         {{ d.get("nofollow",0) }} nofollow links out of {{ d.get("total_external",0) }} external links.
       {%- elif key == "keyword_focus" or d.pages_missing_focus is defined -%}
         {{ d.get("pages_checked",0) }} pages checked.
-        {%- if d.get("pages_missing_focus",0) %} <strong style="color:var(--warn)">{{ d.pages_missing_focus }}</strong> pages have no clear keyword focus.{%- else %} All pages have clear keyword focus ✓{%- endif %}
+        {%- if d.get("pages_missing_focus",0) %} <strong style="color:var(--warn)">{{ d.pages_missing_focus }}</strong> pages lack clear keyword focus.{%- else %} All pages have clear keyword focus ✓{%- endif %}
       {%- elif key == "url_structure" or d.poor_url_structure is defined -%}
         {{ d.get("total",0) }} URLs checked.
-        {%- if d.get("poor_url_structure",0) %} <strong style="color:var(--warn)">{{ d.poor_url_structure }}</strong> have messy URLs (too long or full of random characters).{%- else %} All URLs look clean ✓{%- endif %}
+        {%- if d.get("poor_url_structure",0) %} <strong style="color:var(--warn)">{{ d.poor_url_structure }}</strong> have messy URLs.{%- else %} All URLs look clean ✓{%- endif %}
       {%- elif key == "code_validation" or d.errors is defined -%}
-        {{ d.get("errors",0) }} HTML code errors and {{ d.get("warnings",0) }} warnings found (checked on homepage only).
+        {{ d.get("errors",0) }} HTML errors and {{ d.get("warnings",0) }} warnings found (homepage only).
       {%- elif d.get("lcp") -%}
-        Speed score: <strong>{{ d.get("performance","—") }}/100</strong>. Page loads in {{ d.lcp }} (Google target: under 2.5 seconds).
+        Speed score: <strong>{{ d.get("performance","—") }}/100</strong>. LCP: {{ d.lcp }} (target: under 2.5 s).
       {%- elif d.types_found is defined -%}
-        Schema types found: {{ d.types_found | join(", ") or "None" }}.
+        Schema types: {{ d.types_found | join(", ") or "None" }}.
         {%- if d.get("missing_types") %} Missing: {{ d.missing_types | join(", ") }}.{%- endif %}
       {%- elif d.profiles_found is defined -%}
-        {{ d.get("profiles_found",0) }} social profile{{ "s" if d.get("profiles_found",0) != 1 }} linked from the site.
+        {{ d.get("profiles_found",0) }} social profile{{ "s" if d.get("profiles_found",0) != 1 }} found.
       {%- elif d.redirects_302 is defined or d.redirect_count is defined -%}
         {%- set rc = d.get("redirects_302", d.get("redirect_count",0)) -%}
-        {{ rc }} redirect{{ "s" if rc != 1 }} using temporary (302) instead of permanent (301) redirects.
+        {{ rc }} temporary (302) redirect{{ "s" if rc != 1 }}.
       {%- elif d -%}
         {% for k2, v2 in d.items() %}{{ k2 | replace("_"," ") | capitalize }}: {{ v2 }}. {% endfor %}
       {%- else -%}
@@ -296,7 +333,7 @@
     </div>
     {% set urls = e.get("affected_urls",[]) %}
     {% if urls %}
-    <div style="margin-top:8px; font-size:11px; color:var(--muted); font-weight:600; text-transform:uppercase; letter-spacing:.05em;">Affected pages (top 10)</div>
+    <div style="margin-top:8px; font-size:10px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.06em;">Affected pages (top 10)</div>
     <table class="url-table">
       <tr><th>URL</th></tr>
       {% for u in urls[:10] %}<tr><td><a href="{{ u }}">{{ u }}</a></td></tr>{% endfor %}
@@ -319,36 +356,36 @@
 
 <!-- ══ OVERVIEW ══ -->
 <div class="tab-panel active" id="tab-overview">
-<div class="section" id="overview">
+
+<div class="section">
   <h2>Scores at a glance</h2>
-  <div class="score-tiles">
+  <div class="ov-grid">
     {% set ov = scores.overall %}
     {% set ov_cls = "pass" if ov and ov >= 70 else ("warn" if ov and ov >= 50 else "fail") %}
-    <div class="score-tile">
-      <div class="tile-num {{ ov_cls }}">{{ ov|int if ov else "—" }}</div>
-      <div class="tile-label">Overall</div>
+    <div class="ov-tile {{ ov_cls }}" style="grid-column: span 1;">
+      <div class="ov-tile-score {{ ov_cls }}">{{ ov|int if ov else "—" }}</div>
+      <div class="ov-tile-label">Overall</div>
     </div>
-    {% for key, label, weight in [("on_site","On-site","26%"), ("indexing","Indexing","12%"), ("linking_social","Linking & Social","62%")] %}
+    {% for key, label, weight in [("on_site","On-site","26% of total"),("indexing","Indexing","12% of total"),("linking_social","Linking & Social","62% of total")] %}
     {% set v = scores.get(key) %}
     {% set cls = "pass" if v and v >= 70 else ("warn" if v and v >= 50 else "fail") %}
-    <div class="score-tile">
-      <div class="tile-num {{ cls }}">{{ v|int if v else "—" }}</div>
-      <div class="tile-label">{{ label }}</div>
-      <div class="tile-note">{{ weight }} of total</div>
+    <div class="ov-tile {{ cls }}">
+      <div class="ov-tile-score {{ cls }}">{{ v|int if v else "—" }}</div>
+      <div class="ov-tile-label">{{ label }}</div>
+      <div class="ov-tile-note">{{ weight }}</div>
     </div>
     {% endfor %}
   </div>
 </div>
 
 {% if scores.fix_first %}
-<div class="section">
-  <h2>Fix these first</h2>
-  <p>These areas have the biggest problems. Start here.</p>
-  <div class="fix-list" style="margin-top:10px;">
+<div class="fix-section">
+  <h3>⚠ Fix these first</h3>
+  <div class="fix-items">
     {% for item in scores.fix_first %}
     <div class="fix-item">
-      <div class="fix-num">{{ item.score }}</div>
-      <div>
+      <div class="fix-score-badge">{{ item.score }}</div>
+      <div class="fix-info">
         <div class="fix-name">{{ item.element | replace("_"," ") | title }}</div>
         <div class="fix-cat">{{ item.category | replace("_"," ") | title }}</div>
       </div>
@@ -357,13 +394,69 @@
   </div>
 </div>
 {% endif %}
+
+<div class="section">
+  <h2>Category breakdown</h2>
+
+  {% for cat_key, cat_label, cat_elements in [
+    ("on_site", "On-site SEO", [
+      ("keyword_focus","Keyword Focus"),("url_structure","URL Structure"),
+      ("title_tags","Page Titles"),("meta_descriptions","Meta Descriptions"),
+      ("heading_tags","Headings"),("content","Content Length"),
+      ("internal_linking","Internal Links"),("image_alts","Image ALT Text"),
+      ("nofollow","Nofollow Links"),("page_load_speed","Page Speed"),
+      ("schema","Schema"),("ai_optimization","AI Readiness"),
+      ("code_validation","Code Quality")
+    ]),
+    ("indexing", "Indexing", [
+      ("indexing_optimization","Sitemap & Robots"),
+      ("page_exclusions","Blocked Pages"),("page_inclusions","Visible Pages"),
+      ("url_redirects","Redirects"),("duplicate_content","Duplicate Content"),
+      ("broken_links","Broken Links")
+    ]),
+    ("linking_social", "Linking & Social", [
+      ("linking_root_domains","Linking Domains"),
+      ("inbound_followed_links","Followed Links"),
+      ("authority_trust","Domain Authority"),("social_media","Social Media")
+    ])
+  ] %}
+  {% set v = scores.get(cat_key) %}
+  {% set cls = "pass" if v and v >= 70 else ("warn" if v and v >= 50 else "fail") %}
+  <div class="cat-detail">
+    <div class="cat-detail-head">
+      <div class="cat-detail-name">{{ cat_label }}</div>
+      <div class="cat-detail-score {{ cls }}">{{ v|int if v else "—" }}</div>
+    </div>
+    <div class="cat-detail-bar-track">
+      <div class="cat-detail-bar" style="width:{{ v|int if v else 0 }}%; background:{{ "var(--bar-pass)" if cls == "pass" else ("var(--bar-warn)" if cls == "warn" else "var(--bar-fail)") }};"></div>
+    </div>
+    <div class="cat-detail-items">
+      {% for el_key, el_label in cat_elements %}
+      {% set e = scores.elements.get(el_key, {}) %}
+      {% set s = e.get("score") %}
+      {% if s is not none %}
+        {% if s >= 7 %}{% set el_cls = "pass" %}
+        {% elif s >= 4 %}{% set el_cls = "warn" %}
+        {% else %}{% set el_cls = "fail" %}{% endif %}
+      {% else %}{% set el_cls = "na" %}{% endif %}
+      <div class="cat-el-badge {{ el_cls }}">
+        <span class="dot"></span>
+        <span>{{ el_label }}</span>
+        {% if s is not none %}<strong>{{ s }}</strong>{% endif %}
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endfor %}
 </div>
+
+</div><!-- /overview -->
 
 <!-- ══ ON-SITE ══ -->
 <div class="tab-panel" id="tab-onsite">
-<div class="section" id="onsite">
+<div class="section">
   <h2>On-site SEO</h2>
-  <p style="margin-bottom:12px;">These are things on your own website that you can fix directly.</p>
+  <p style="margin-bottom:14px;">These are things on your own website that you or your developer can fix directly.</p>
   <div class="el-list">
     {{ el("keyword_focus", "Keyword Focus") }}
     {{ el("url_structure", "URL Structure") }}
@@ -384,9 +477,9 @@
 
 <!-- ══ INDEXING ══ -->
 <div class="tab-panel" id="tab-indexing">
-<div class="section" id="indexing">
+<div class="section">
   <h2>Indexing</h2>
-  <p style="margin-bottom:12px;">How well Google can find and index your pages.</p>
+  <p style="margin-bottom:14px;">How well Google can find and index your pages.</p>
   <div class="el-list">
     {{ el("indexing_optimization", "Sitemap & Robots.txt") }}
     {{ el("page_exclusions", "Pages Blocked from Google") }}
@@ -400,21 +493,21 @@
 
 <!-- ══ LINKING & SOCIAL ══ -->
 <div class="tab-panel" id="tab-linking">
-<div class="section" id="linking">
+<div class="section">
   <h2>Linking &amp; Social</h2>
-  <p style="margin-bottom:12px;">How other websites and social media link to you.</p>
+  <p style="margin-bottom:14px;">Other websites linking to yours and your social media presence.</p>
 
   {% if backlinks.available %}
   <div class="stat-box">
-    <h3 style="margin-top:0;">Backlink Overview</h3>
+    <h3 style="margin:0 0 6px; font-size:13px;">Backlink Overview (Common Crawl)</h3>
     {% if backlinks.get("pages_indexed") is not none %}
-    <p><strong>{{ backlinks.pages_indexed }}</strong> of your pages appear in the Common Crawl index.</p>
+    <p><strong>{{ backlinks.pages_indexed }}</strong> pages from this site appear in Common Crawl's index.</p>
     {% endif %}
-    <p style="font-size:12px; margin-top:6px;">{{ backlinks.note }}</p>
+    <p style="font-size:11px; color:var(--muted); margin-top:4px;">{{ backlinks.note }}</p>
   </div>
   {% else %}
   <div class="stat-box">
-    <p>{{ backlinks.note or "Backlink data could not be retrieved at this time." }}</p>
+    <p>{{ backlinks.note or "Backlink data could not be retrieved." }}</p>
   </div>
   {% endif %}
 
@@ -429,7 +522,7 @@
 
 <!-- ══ SCREENSHOTS ══ -->
 <div class="tab-panel" id="tab-screenshots">
-<div class="section" id="screenshots">
+<div class="section">
   <h2>Screenshots</h2>
   {% if screenshots.available and screenshots.screenshots %}
   <div class="screenshot-grid">
@@ -454,13 +547,12 @@
 
 <!-- ══ METHODOLOGY ══ -->
 <div class="tab-panel" id="tab-methodology">
-<div class="section" id="methodology">
+<div class="section">
   <h2>How we check your site</h2>
-  <p style="margin-bottom:14px;">Here's what this report actually looks at and where the data comes from.</p>
   <div class="faq">
     <div class="faq-item">
       <div class="faq-q">What does "On-site" cover?</div>
-      <div class="faq-a">Everything on your own website — page titles, descriptions, headings, images, page speed, and the code quality. These are things you (or your developer) can fix directly.</div>
+      <div class="faq-a">Everything on your own website — page titles, descriptions, headings, images, page speed, and code quality. These are things you (or your developer) can fix directly.</div>
     </div>
     <div class="faq-item">
       <div class="faq-q">What does "Indexing" mean?</div>
@@ -476,7 +568,7 @@
     </div>
     <div class="faq-item">
       <div class="faq-q">What is Domain Authority?</div>
-      <div class="faq-a">A score (invented by Moz) that predicts how well your site ranks. It's not available through free tools, so we can't show it here.</div>
+      <div class="faq-a">A score that predicts how well your site ranks. It requires paid tools (Moz, Ahrefs) so we can't show it here.</div>
     </div>
     <div class="faq-item">
       <div class="faq-q">What is AI Readiness?</div>
@@ -484,7 +576,7 @@
     </div>
     <div class="faq-item">
       <div class="faq-q">What is Structured Data (Schema)?</div>
-      <div class="faq-a">Hidden code that tells Google what your page is about — a product, a review, an FAQ, a local business, etc. Good Schema can get you "rich results" in Google (star ratings, FAQs shown directly in search).</div>
+      <div class="faq-a">Hidden code that tells Google what your page is about. Good Schema can earn you star ratings or FAQ answers shown directly in Google search results.</div>
     </div>
     <div class="faq-item">
       <div class="faq-q">Who prepared this report?</div>
@@ -505,7 +597,6 @@ function showTab(id, btn) {
 function toggleEl(row) {
   row.classList.toggle('open');
 }
-// Auto-open any element that has a score < 7
 document.addEventListener('DOMContentLoaded', function() {
   document.querySelectorAll('.el-score.fail, .el-score.warn').forEach(function(el) {
     el.closest('.el-row').classList.add('open');

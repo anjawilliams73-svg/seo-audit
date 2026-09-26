@@ -138,9 +138,14 @@ def _extract_links(soup: BeautifulSoup, base_url: str, base_host: str) -> list[s
         href = a["href"].strip()
         if href.startswith("#") or href.startswith("mailto:") or href.startswith("tel:"):
             continue
+        # Skip hrefs that are absolute URLs with backslash-escaping (e.g. \/\/www.example.com\/)
+        if href.startswith("\\/") or href.startswith("\\"):
+            continue
         full = urljoin(base_url, href).split("#")[0].split("?")[0]
-        if full.startswith("http"):
-            links.append(full)
+        # Skip malformed URLs produced by backslash-encoded paths
+        if not full.startswith("http") or "\\/" in full or "%5C" in full.upper():
+            continue
+        links.append(full)
     return links
 
 

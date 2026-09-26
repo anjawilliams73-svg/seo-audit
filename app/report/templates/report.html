@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SEO Audit Report — {{ job.site_name }}</title>
+<title>SEO Audit — {{ job.site_name }}</title>
 <style>
   :root {
     --green: #354D08; --lime: #d9f99d; --bg: #f8fdf0; --card: #fff;
@@ -16,8 +16,7 @@
   body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--bg); color: var(--text); font-size: 13px; line-height: 1.6; }
   a { color: var(--green); }
 
-  /* cover */
-  .cover { background: var(--green); color: #fff; padding: 56px 40px 48px; page-break-after: always; }
+  .cover { background: var(--green); color: #fff; padding: 56px 40px 48px; }
   .cover-kicker { font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: rgba(217,249,157,.5); margin-bottom: 12px; }
   .cover-name { font-size: 2.4rem; font-weight: 800; letter-spacing: -.03em; margin-bottom: 4px; }
   .cover-url { font-size: 14px; color: rgba(255,255,255,.55); margin-bottom: 28px; }
@@ -27,28 +26,30 @@
   .cover-meta-item { font-size: 11px; color: rgba(255,255,255,.5); }
   .cover-meta-item strong { display: block; font-size: 13px; color: #fff; }
 
-  /* layout */
-  .page { padding: 32px 40px; }
-  .section { margin-bottom: 32px; }
+  .tab-nav { display: flex; gap: 4px; background: var(--card); border-bottom: 2px solid var(--border); padding: 0 24px; position: sticky; top: 0; z-index: 100; overflow-x: auto; }
+  .tab-btn { padding: 12px 20px; font-size: 12px; font-weight: 600; color: var(--muted); background: none; border: none; border-bottom: 3px solid transparent; cursor: pointer; transition: color .15s; margin-bottom: -2px; white-space: nowrap; }
+  .tab-btn:hover { color: var(--green); }
+  .tab-btn.active { color: var(--green); border-bottom-color: var(--green); }
+  .tab-panel { display: none; padding: 28px 32px; }
+  .tab-panel.active { display: block; }
+
+  .section { margin-bottom: 28px; }
   h2 { font-size: 16px; font-weight: 700; color: var(--green); margin-bottom: 16px; padding-bottom: 6px; border-bottom: 2px solid var(--lime); }
-  h3 { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+  h3 { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 10px; margin-top: 20px; }
   p { margin-bottom: 8px; color: var(--muted); }
 
-  /* scorecard */
-  .scorecard { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .scorecard { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; }
   .score-cell { background: var(--card); border: 1.5px solid var(--border); border-radius: 10px; padding: 16px 14px; text-align: center; }
   .score-num { font-size: 2rem; font-weight: 800; color: var(--green); line-height: 1; }
   .score-label { font-size: 10px; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); margin-top: 4px; }
   .score-weight { font-size: 10px; color: rgba(100,116,139,.6); margin-top: 2px; }
 
-  /* fix first */
   .fix-list { display: flex; flex-direction: column; gap: 8px; }
   .fix-item { display: flex; align-items: center; gap: 12px; background: var(--fail-bg); border: 1px solid #fca5a5; border-radius: 8px; padding: 10px 14px; }
   .fix-score { font-size: 16px; font-weight: 800; color: var(--fail); width: 28px; text-align: center; flex-shrink: 0; }
   .fix-name { font-size: 12px; font-weight: 600; color: var(--fail); }
   .fix-cat { font-size: 10px; color: rgba(153,27,27,.6); text-transform: uppercase; letter-spacing: .08em; }
 
-  /* element section */
   .element { background: var(--card); border: 1.5px solid var(--border); border-radius: 12px; margin-bottom: 12px; overflow: hidden; }
   .element-head { display: flex; align-items: center; gap: 12px; padding: 14px 18px; border-bottom: 1px solid var(--border); }
   .element-score { font-size: 1.4rem; font-weight: 800; color: var(--green); width: 36px; text-align: center; flex-shrink: 0; }
@@ -57,47 +58,51 @@
   .element-score.na { color: var(--muted); font-size: .95rem; }
   .element-title { font-size: 13px; font-weight: 700; flex: 1; }
   .element-body { padding: 14px 18px; }
-  .element-body .label { font-size: 10px; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); margin-bottom: 4px; margin-top: 10px; }
-  .element-body .label:first-child { margin-top: 0; }
-  .element-body .analysis { font-size: 12.5px; color: var(--text); }
-  .element-body .rec { font-size: 12.5px; color: var(--text); background: var(--bg); border-left: 3px solid var(--lime); padding: 8px 12px; border-radius: 0 6px 6px 0; margin-top: 6px; }
-  .element-body .guideline { font-size: 12px; color: var(--muted); background: var(--card); border: 1px solid var(--border); padding: 8px 12px; border-radius: 6px; margin-top: 6px; }
-
-  /* evidence link */
+  .lbl { font-size: 10px; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); margin-bottom: 4px; margin-top: 10px; }
+  .lbl:first-child { margin-top: 0; }
+  .analysis { font-size: 12.5px; color: var(--text); }
+  .rec { font-size: 12.5px; color: var(--text); background: var(--bg); border-left: 3px solid var(--lime); padding: 8px 12px; border-radius: 0 6px 6px 0; margin-top: 6px; }
+  .guideline { font-size: 12px; color: var(--muted); background: var(--card); border: 1px solid var(--border); padding: 8px 12px; border-radius: 6px; margin-top: 6px; }
   .evidence-link { font-size: 11px; color: var(--green); display: inline-block; margin-top: 6px; }
 
-  /* urls table */
   .url-table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 11px; }
   .url-table th { text-align: left; padding: 6px 8px; background: var(--bg); font-weight: 600; color: var(--muted); border-bottom: 1px solid var(--border); }
   .url-table td { padding: 5px 8px; border-bottom: 1px solid #f0f4e8; word-break: break-all; }
 
-  /* screenshot */
   .screenshot-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
   .screenshot-card { border: 1.5px solid var(--border); border-radius: 10px; overflow: hidden; }
   .screenshot-label { padding: 8px 12px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); background: var(--bg); }
-  .screenshot-card img { width: 100%; display: block; }
+  .screenshot-card img { width: 100%; display: block; max-height: 420px; object-fit: cover; object-position: top; }
+  .screenshot-placeholder { background: #f0f4e8; height: 180px; display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 12px; }
 
-  /* methodology */
   .method-table { width: 100%; border-collapse: collapse; font-size: 12px; }
   .method-table th { text-align: left; padding: 8px 10px; background: var(--bg); color: var(--muted); font-weight: 600; border-bottom: 1px solid var(--border); }
   .method-table td { padding: 7px 10px; border-bottom: 1px solid #f0f4e8; vertical-align: top; }
 
-  /* status badges */
   .badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 10px; font-weight: 700; letter-spacing: .05em; }
   .badge.pass { background: var(--pass-bg); color: var(--pass); }
   .badge.warn { background: var(--warn-bg); color: var(--warn); }
   .badge.fail { background: var(--fail-bg); color: var(--fail); }
   .badge.na { background: #f1f5f9; color: var(--muted); }
 
+  .toc { display: none; padding: 28px 32px; }
+
   @media print {
-    .section { page-break-inside: avoid; }
+    .tab-nav { display: none !important; }
+    .tab-panel { display: block !important; padding: 20px 32px; }
+    .toc { display: block; page-break-after: always; }
     .cover { page-break-after: always; }
+    .section { page-break-inside: avoid; }
+    .element { page-break-inside: avoid; }
+    .screenshot-card img { max-height: 300px; }
+    h2 { bookmark-level: 1; bookmark-label: content(); }
+    h3 { bookmark-level: 2; bookmark-label: content(); }
+    @page { margin: 15mm 18mm; @bottom-right { content: "Page " counter(page); font-size: 10px; color: #888; } }
   }
 </style>
 </head>
 <body>
 
-<!-- ══ COVER ══════════════════════════════════════════════════════════════ -->
 <div class="cover">
   <p class="cover-kicker">SEO Audit Report</p>
   <div class="cover-name">{{ job.site_name }}</div>
@@ -113,10 +118,30 @@
   </div>
 </div>
 
-<div class="page">
+<div class="toc">
+  <h2>Table of Contents</h2>
+  <table class="url-table">
+    <tr><th>#</th><th>Section</th></tr>
+    <tr><td>1</td><td><a href="#overview">Overview &amp; Scorecard</a></td></tr>
+    <tr><td>2</td><td><a href="#onsite">On-site SEO</a></td></tr>
+    <tr><td>3</td><td><a href="#indexing">Indexing</a></td></tr>
+    <tr><td>4</td><td><a href="#linking">Linking &amp; Social</a></td></tr>
+    <tr><td>5</td><td><a href="#screenshots">Screenshots</a></td></tr>
+    <tr><td>6</td><td><a href="#methodology">Methodology</a></td></tr>
+  </table>
+</div>
 
-<!-- ══ SCORECARD ══════════════════════════════════════════════════════════ -->
-<div class="section">
+<div class="tab-nav">
+  <button class="tab-btn active" onclick="showTab('overview',this)">Overview</button>
+  <button class="tab-btn" onclick="showTab('onsite',this)">On-site</button>
+  <button class="tab-btn" onclick="showTab('indexing',this)">Indexing</button>
+  <button class="tab-btn" onclick="showTab('linking',this)">Linking &amp; Social</button>
+  <button class="tab-btn" onclick="showTab('screenshots',this)">Screenshots</button>
+  <button class="tab-btn" onclick="showTab('methodology',this)">Methodology</button>
+</div>
+
+<div class="tab-panel active" id="tab-overview">
+<div class="section" id="overview">
   <h2>Scorecard</h2>
   <div class="scorecard">
     <div class="score-cell">
@@ -140,12 +165,10 @@
     </div>
   </div>
 </div>
-
-<!-- ══ FIX FIRST ═══════════════════════════════════════════════════════════ -->
 {% if scores.fix_first %}
 <div class="section">
   <h2>Fix First</h2>
-  <p>These elements scored 3 or below. Fix them before anything else.</p>
+  <p>These elements scored 3 or below — fix them before anything else.</p>
   <div class="fix-list">
     {% for item in scores.fix_first %}
     <div class="fix-item">
@@ -159,69 +182,97 @@
   </div>
 </div>
 {% endif %}
+</div>
 
-<!-- ══ PART 1: WEBSITE AUDIT ═══════════════════════════════════════════════ -->
-<div class="section">
-  <h2>Part 1 — Website Audit</h2>
-
-  {% macro element_block(key, title, evidence_url=None) %}
-  {% set el = scores.elements.get(key, {}) %}
-  {% set s = el.get("score") %}
-  <div class="element">
-    <div class="element-head">
-      <div class="element-score {% if s is none %}na{% elif s <= 3 %}fail{% elif s <= 6 %}warn{% endif %}">
-        {{ s if s is not none else "N/A" }}
-      </div>
-      <div class="element-title">{{ title }}</div>
-      {% if s is not none %}
-      <span class="badge {% if s >= 7 %}pass{% elif s >= 4 %}warn{% else %}fail{% endif %}">
-        {% if s >= 7 %}Good{% elif s >= 4 %}Needs work{% else %}Fix first{% endif %}
-      </span>
-      {% else %}
-      <span class="badge na">Not available</span>
-      {% endif %}
+{% macro element_block(key, title, evidence_url=None) %}
+{% set el = scores.elements.get(key, {}) %}
+{% set s = el.get("score") %}
+{% set d = el.get("details", {}) %}
+<div class="element">
+  <div class="element-head">
+    <div class="element-score {% if s is none %}na{% elif s <= 3 %}fail{% elif s <= 6 %}warn{% endif %}">
+      {{ s if s is not none else "N/A" }}
     </div>
-    <div class="element-body">
-      <div class="label">Analysis</div>
-      <div class="analysis">
-        {% set d = el.get("details", {}) %}
-        {% if d.get("note") %}{{ d.note }}
-        {% elif d.get("missing") is defined %}{{ d.missing }} pages missing, {{ d.get("too_long", 0) }} too long, {{ d.get("too_short", 0) }} too short.
-        {% elif d.get("thin_pages") is defined %}{{ d.thin_pages }} thin pages (under 300 words). Average word count: {{ d.get("avg_word_count", "—") }}.
-        {% elif d.get("broken_count") is defined %}{{ d.broken_count }} broken links (404s) found.
-        {% elif d.get("errors") is defined %}{{ d.errors }} HTML errors and {{ d.warnings }} warnings found (W3C validator, homepage only).
-        {% elif d.get("lcp") %}LCP: {{ d.lcp }} (Performance: {{ d.get("performance", "—") }}/100).
-        {% elif d.get("types_found") is defined %}Schema types found: {{ d.types_found | join(", ") or "None" }}. Missing: {{ d.missing_types | join(", ") or "None" }}.
-        {% elif d.get("profiles_found") is defined %}{{ d.profiles_found }} social profiles linked from the site.
-        {% else %}{{ d | tojson }}
-        {% endif %}
-      </div>
-      {% set urls = el.get("affected_urls", []) %}
-      {% if urls %}
-      <div class="label">Affected URLs (top 10)</div>
-      <table class="url-table">
-        <tr><th>URL</th></tr>
-        {% for u in urls[:10] %}<tr><td><a href="{{ u }}">{{ u }}</a></td></tr>{% endfor %}
-      </table>
-      {% endif %}
-      {% set rec = recommendations.get(key) %}
-      {% if rec and s is not none and s < 8 %}
-      <div class="label">Recommendation</div>
-      <div class="rec">{{ rec }}</div>
-      {% endif %}
-      {% set guide = guidelines.get(key) %}
-      {% if guide %}
-      <div class="label">Guideline</div>
-      <div class="guideline">{{ guide }}</div>
-      {% endif %}
-      {% if evidence_url %}
-      <a class="evidence-link" href="{{ evidence_url }}" target="_blank">View evidence →</a>
-      {% endif %}
-    </div>
+    <div class="element-title">{{ title }}</div>
+    {% if s is not none %}
+    <span class="badge {% if s >= 7 %}pass{% elif s >= 4 %}warn{% else %}fail{% endif %}">
+      {% if s >= 7 %}Good{% elif s >= 4 %}Needs work{% else %}Fix first{% endif %}
+    </span>
+    {% else %}
+    <span class="badge na">Not available</span>
+    {% endif %}
   </div>
-  {% endmacro %}
+  <div class="element-body">
+    <div class="lbl">Analysis</div>
+    <div class="analysis">
+      {%- if d.get("note") -%}
+        {{ d.note }}
+      {%- elif key == "title_tags" -%}
+        {{ d.get("total", 0) }} pages analysed.
+        {%- if d.get("missing", 0) %} {{ d.missing }} missing title tags.{%- endif %}
+        {%- if d.get("too_long", 0) %} {{ d.too_long }} titles over 60 chars.{%- endif %}
+        {%- if d.get("too_short", 0) %} {{ d.too_short }} titles under 30 chars.{%- endif %}
+        {%- if d.get("duplicates", 0) %} {{ d.duplicates }} duplicate titles.{%- endif %}
+        {%- if not d.get("missing") and not d.get("too_long") and not d.get("too_short") and not d.get("duplicates") %} All titles look good.{%- endif %}
+      {%- elif key == "meta_descriptions" -%}
+        {{ d.get("total", 0) }} pages analysed.
+        {%- if d.get("missing", 0) %} {{ d.missing }} missing meta descriptions.{%- endif %}
+        {%- if d.get("too_long", 0) %} {{ d.too_long }} over 155 chars.{%- endif %}
+        {%- if not d.get("missing") and not d.get("too_long") %} All meta descriptions look good.{%- endif %}
+      {%- elif key == "heading_tags" -%}
+        {{ d.get("total", 0) }} pages analysed.
+        {%- if d.get("missing_h1", 0) %} {{ d.missing_h1 }} pages missing an H1.{%- endif %}
+        {%- if d.get("multiple_h1", 0) %} {{ d.multiple_h1 }} pages with multiple H1s.{%- endif %}
+        {%- if d.get("duplicate_h1", 0) %} {{ d.duplicate_h1 }} duplicate H1 texts.{%- endif %}
+        {%- if not d.get("missing_h1") and not d.get("multiple_h1") and not d.get("duplicate_h1") %} All H1 tags look good.{%- endif %}
+      {%- elif key == "image_alts" -%}
+        {{ d.get("missing_alt", 0) }} images missing ALT text out of {{ d.get("total_images", "?") }} total.
+      {%- elif key == "broken_links" -%}
+        {%- set bc = d.get("broken_count", 0) -%}
+        {%- if bc == 0 %}No broken links found.{%- else %}{{ bc }} broken link{{ "s" if bc != 1 }} (404) found.{%- endif %}
+      {%- elif d.get("thin_pages") is defined -%}
+        {{ d.thin_pages }} thin pages (under 300 words). Average word count: {{ d.get("avg_word_count", "—") }}.
+      {%- elif d.get("errors") is defined -%}
+        {{ d.errors }} HTML errors and {{ d.get("warnings", 0) }} warnings (W3C validator, homepage only).
+      {%- elif d.get("lcp") -%}
+        LCP: {{ d.lcp }}. Performance score: {{ d.get("performance", "—") }}/100.
+      {%- elif d.get("types_found") is defined -%}
+        Schema types found: {{ d.types_found | join(", ") or "None" }}.
+        {%- if d.get("missing_types") %} Missing recommended types: {{ d.missing_types | join(", ") }}.{%- endif %}
+      {%- elif d.get("profiles_found") is defined -%}
+        {{ d.profiles_found }} social profile{{ "s" if d.profiles_found != 1 }} linked from the site.
+      {%- else -%}
+        {{ d | tojson }}
+      {%- endif -%}
+    </div>
+    {% set urls = el.get("affected_urls", []) %}
+    {% if urls %}
+    <div class="lbl">Affected URLs (top 10)</div>
+    <table class="url-table">
+      <tr><th>URL</th></tr>
+      {% for u in urls[:10] %}<tr><td><a href="{{ u }}">{{ u }}</a></td></tr>{% endfor %}
+    </table>
+    {% endif %}
+    {% set rec = recommendations.get(key, "") %}
+    {% if rec and s is not none and s < 8 %}
+    <div class="lbl">Recommendation</div>
+    <div class="rec">{{ rec }}</div>
+    {% endif %}
+    {% set guide = guidelines.get(key) %}
+    {% if guide %}
+    <div class="lbl">Guideline</div>
+    <div class="guideline">{{ guide }}</div>
+    {% endif %}
+    {% if evidence_url %}
+    <a class="evidence-link" href="{{ evidence_url }}" target="_blank">View evidence →</a>
+    {% endif %}
+  </div>
+</div>
+{% endmacro %}
 
-  <h3>On-site</h3>
+<div class="tab-panel" id="tab-onsite">
+<div class="section" id="onsite">
+  <h2>On-site SEO</h2>
   {{ element_block("keyword_focus", "Keyword Focus") }}
   {{ element_block("url_structure", "URL Structure") }}
   {{ element_block("title_tags", "Title Tags") }}
@@ -235,103 +286,108 @@
   {{ element_block("schema", "Schema / Structured Data", evidence_url="https://validator.schema.org/#url=" ~ job.url) }}
   {{ element_block("ai_optimization", "AI Optimization") }}
   {{ element_block("code_validation", "Code Validation", evidence_url="https://validator.w3.org/nu/?doc=" ~ job.url) }}
+</div>
+</div>
 
-  <h3>Indexing</h3>
+<div class="tab-panel" id="tab-indexing">
+<div class="section" id="indexing">
+  <h2>Indexing</h2>
   {{ element_block("indexing_optimization", "Indexing Optimization") }}
   {{ element_block("page_exclusions", "Page Exclusions") }}
   {{ element_block("page_inclusions", "Page Inclusions") }}
   {{ element_block("url_redirects", "URL Redirects") }}
   {{ element_block("duplicate_content", "Duplicate Content") }}
   {{ element_block("broken_links", "Broken Links") }}
+</div>
+</div>
 
-  <h3>Linking &amp; Social</h3>
+<div class="tab-panel" id="tab-linking">
+<div class="section" id="linking">
+  <h2>Linking &amp; Social</h2>
+  {% if backlinks.available %}
+  <div class="section">
+    <h3>Backlink Overview</h3>
+    <div class="scorecard">
+      {% if backlinks.get("linking_domains") is not none %}
+      <div class="score-cell"><div class="score-num">{{ backlinks.linking_domains }}</div><div class="score-label">Linking Domains</div></div>
+      {% endif %}
+      {% if backlinks.get("inbound_urls") is not none %}
+      <div class="score-cell"><div class="score-num">{{ backlinks.inbound_urls }}</div><div class="score-label">Inbound URLs</div></div>
+      {% endif %}
+      {% if backlinks.get("pages_indexed") is not none %}
+      <div class="score-cell"><div class="score-num">{{ backlinks.pages_indexed }}</div><div class="score-label">Pages in CC Index</div></div>
+      {% endif %}
+    </div>
+    <p style="margin-top:10px; font-size:11px;">{{ backlinks.note }}</p>
+  </div>
+  {% else %}
+  <div class="element">
+    <div class="element-head">
+      <div class="element-score na">N/A</div>
+      <div class="element-title">Backlink Data</div>
+      <span class="badge na">Not available</span>
+    </div>
+    <div class="element-body"><div class="analysis">{{ backlinks.note }}</div></div>
+  </div>
+  {% endif %}
   {{ element_block("linking_root_domains", "Linking Root Domains") }}
   {{ element_block("inbound_followed_links", "Inbound Followed Links") }}
   {{ element_block("authority_trust", "Authority &amp; Trust") }}
   {{ element_block("social_media", "Social Media") }}
   {{ element_block("competitive_link_comparison", "Competitive Link Comparison") }}
-  {{ element_block("google_business_profile", "Google Business Profile") }}
   {{ element_block("nap", "NAP Consistency") }}
 </div>
-
-<!-- ══ PART 2: GBP AUDIT ═══════════════════════════════════════════════════ -->
-{% if gbp.available %}
-<div class="section">
-  <h2>Part 2 — Google Business Profile Audit</h2>
-  <div class="element">
-    <div class="element-head">
-      <div class="element-score">{{ scores.elements.get("google_business_profile", {}).get("score", "—") }}</div>
-      <div class="element-title">{{ gbp.name }}</div>
-    </div>
-    <div class="element-body">
-      <table class="url-table">
-        <tr><th>Field</th><th>Value</th></tr>
-        <tr><td>Name</td><td>{{ gbp.name or "—" }}</td></tr>
-        <tr><td>Address</td><td>{{ gbp.address or "—" }}</td></tr>
-        <tr><td>Phone</td><td>{{ gbp.phone or "—" }}</td></tr>
-        <tr><td>Website</td><td>{{ gbp.website or "—" }}</td></tr>
-        <tr><td>Primary category</td><td>{{ gbp.primary_type or "—" }}</td></tr>
-        <tr><td>Rating</td><td>{{ gbp.rating or "—" }} ({{ gbp.review_count or 0 }} reviews)</td></tr>
-        <tr><td>Photos</td><td>{{ gbp.photos or "0" }}</td></tr>
-        <tr><td>Hours</td><td>{{ "Set" if gbp.hours else "Not set" }}</td></tr>
-      </table>
-      <div class="label" style="margin-top:14px;">NAP Consistency (Part 3)</div>
-      {% if nap.mismatches %}
-      <p>{{ nap.mismatches | length }} mismatch(es) found between website, GBP, and schema.</p>
-      <table class="url-table">
-        <tr><th>Field</th><th>Website</th><th>GBP</th><th>Schema</th></tr>
-        {% for m in nap.mismatches %}
-        <tr>
-          <td><strong>{{ m.field }}</strong></td>
-          <td>{{ m.site or "—" }}</td>
-          <td>{{ m.gbp or "—" }}</td>
-          <td>{{ m.schema or "—" }}</td>
-        </tr>
-        {% endfor %}
-      </table>
-      {% else %}
-      <p>NAP is consistent across all three sources.</p>
-      {% endif %}
-    </div>
-  </div>
 </div>
-{% endif %}
 
-<!-- ══ SCREENSHOTS ═════════════════════════════════════════════════════════ -->
-{% if screenshots.available and screenshots.screenshots %}
-<div class="section">
+<div class="tab-panel" id="tab-screenshots">
+<div class="section" id="screenshots">
   <h2>Screenshots</h2>
+  {% if screenshots.available and screenshots.screenshots %}
   <div class="screenshot-grid">
     {% for s in screenshots.screenshots %}
-    {% if not s.get("error") %}
     <div class="screenshot-card">
       <div class="screenshot-label">{{ s.type | title }}</div>
-      <img src="{{ s.path }}" alt="{{ s.type }} screenshot">
+      {% if s.get("data_uri") %}
+        <img src="{{ s.data_uri }}" alt="{{ s.type }} screenshot">
+      {% elif s.get("path") %}
+        <img src="{{ s.path }}" alt="{{ s.type }} screenshot">
+      {% else %}
+        <div class="screenshot-placeholder">Screenshot unavailable{% if s.get("error") %}: {{ s.error }}{% endif %}</div>
+      {% endif %}
     </div>
-    {% endif %}
     {% endfor %}
   </div>
+  {% else %}
+  <p>Screenshots could not be captured for this site.</p>
+  {% endif %}
 </div>
-{% endif %}
+</div>
 
-<!-- ══ METHODOLOGY ══════════════════════════════════════════════════════════ -->
-<div class="section">
+<div class="tab-panel" id="tab-methodology">
+<div class="section" id="methodology">
   <h2>Methodology</h2>
   <table class="method-table">
     <tr><th>Area</th><th>Source</th><th>Status</th></tr>
-    <tr><td>On-page signals</td><td>Own crawl (advertools)</td><td><span class="badge pass">Available</span></td></tr>
+    <tr><td>On-page signals</td><td>Own crawler (httpx + BeautifulSoup)</td><td><span class="badge pass">Available</span></td></tr>
     <tr><td>Speed &amp; Core Web Vitals</td><td>Google PageSpeed Insights API</td><td><span class="badge {{ 'pass' if psi_available else 'na' }}">{{ 'Available' if psi_available else 'Not available' }}</span></td></tr>
     <tr><td>Schema</td><td>extruct (JSON-LD, microdata)</td><td><span class="badge pass">Available</span></td></tr>
-    <tr><td>Backlinks</td><td>Common Crawl (estimate)</td><td><span class="badge {{ 'warn' if backlinks.available else 'na' }}">{{ 'Partial estimate' if backlinks.available else 'Not available' }}</span></td></tr>
+    <tr><td>Backlinks / Crawl coverage</td><td>Common Crawl index</td><td><span class="badge {{ 'warn' if backlinks.available else 'na' }}">{{ 'Partial estimate' if backlinks.available else 'Not available' }}</span></td></tr>
     <tr><td>Social activity</td><td>YouTube Data API v3; other platforms: link presence only</td><td><span class="badge warn">Partial</span></td></tr>
-    <tr><td>GBP</td><td>Google Places API</td><td><span class="badge {{ 'pass' if gbp.available else 'na' }}">{{ 'Available' if gbp.available else 'Not available' }}</span></td></tr>
     <tr><td>Domain Authority / DA</td><td>Not available for free</td><td><span class="badge na">Not available</span></td></tr>
     <tr><td>Local pack ranking</td><td>Not available for free</td><td><span class="badge na">Not available</span></td></tr>
     <tr><td>AI visibility mentions</td><td>Not available for free</td><td><span class="badge na">Not available</span></td></tr>
   </table>
   <p style="margin-top:12px;">Prepared by Baheesa Fatima · <a href="https://baheesafatima.com">baheesafatima.com</a></p>
 </div>
+</div>
 
-</div><!-- /page -->
+<script>
+function showTab(id, btn) {
+  document.querySelectorAll('.tab-panel').forEach(function(p){ p.classList.remove('active'); });
+  document.querySelectorAll('.tab-btn').forEach(function(b){ b.classList.remove('active'); });
+  document.getElementById('tab-' + id).classList.add('active');
+  btn.classList.add('active');
+}
+</script>
 </body>
 </html>

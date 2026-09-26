@@ -39,7 +39,6 @@ ELEMENTS = {
         "authority_trust",
         "social_media",
         "competitive_link_comparison",
-        "google_business_profile",
         "nap",
     ],
 }

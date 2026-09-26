@@ -10,51 +10,67 @@ from urllib.parse import urlparse
 
 import httpx
 
-_CC_API = "https://index.commoncrawl.org/CC-MAIN-2024-42-index"
+# Try multiple recent CC indexes in order; stop at first successful response
+_CC_INDEXES = [
+    "https://index.commoncrawl.org/CC-MAIN-2025-13-index",
+    "https://index.commoncrawl.org/CC-MAIN-2024-51-index",
+    "https://index.commoncrawl.org/CC-MAIN-2024-42-index",
+]
 
 
 async def collect(start_url: str) -> dict[str, Any]:
+    import json as _json
     host = urlparse(start_url).netloc.lstrip("www.")
+    # Query pages crawled ON this domain (coverage signal, not true backlinks)
     params = {
         "url": f"*.{host}",
         "output": "json",
         "fl": "url,timestamp,status",
-        "limit": "500",
+        "limit": "1000",
         "filter": "status:200",
     }
-    try:
-        async with httpx.AsyncClient(timeout=20) as c:
-            r = await c.get(_CC_API, params=params)
-            if r.status_code != 200:
-                return _unavailable("non-200 from Common Crawl")
+    last_exc = ""
+    async with httpx.AsyncClient(timeout=25) as c:
+        for api_url in _CC_INDEXES:
+            try:
+                r = await c.get(api_url, params=params)
+                if r.status_code != 200:
+                    last_exc = f"HTTP {r.status_code} from {api_url}"
+                    continue
 
-            lines = [l.strip() for l in r.text.strip().splitlines() if l.strip()]
-            import json
-            records = []
-            for line in lines:
-                try:
-                    records.append(json.loads(line))
-                except Exception:
-                    pass
+                lines = [ln.strip() for ln in r.text.strip().splitlines() if ln.strip()]
+                records = []
+                for ln in lines:
+                    try:
+                        records.append(_json.loads(ln))
+                    except Exception:
+                        pass
 
-            unique_urls = {rec["url"] for rec in records}
-            unique_domains: set[str] = set()
-            for rec in records:
-                try:
-                    unique_domains.add(urlparse(rec["url"]).netloc)
-                except Exception:
-                    pass
+                if not records:
+                    last_exc = "empty response"
+                    continue
 
-            return {
-                "available": True,
-                "is_estimate": True,
-                "source": "Common Crawl",
-                "linking_domains": len(unique_domains) - 1,  # exclude self
-                "inbound_urls": len(unique_urls),
-                "note": "Partial estimate from Common Crawl index. Not a complete backlink count.",
-            }
-    except Exception as exc:
-        return _unavailable(str(exc))
+                unique_urls = {rec["url"] for rec in records}
+                unique_paths = len(unique_urls)
+
+                return {
+                    "available": True,
+                    "is_estimate": True,
+                    "source": "Common Crawl",
+                    "linking_domains": None,   # CC index doesn't expose inbound links
+                    "inbound_urls": None,
+                    "pages_indexed": unique_paths,
+                    "note": (
+                        f"Common Crawl found {unique_paths} pages from this site in its index. "
+                        "This reflects crawl coverage, not inbound backlinks. "
+                        "For true backlink data use Ahrefs, Moz, or Semrush."
+                    ),
+                }
+            except Exception as exc:
+                last_exc = str(exc)
+                continue
+
+    return _unavailable(last_exc)
 
 
 def _unavailable(reason: str) -> dict[str, Any]:

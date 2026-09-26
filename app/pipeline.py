@@ -101,7 +101,6 @@ async def run(
         "authority_trust":            rules.score_authority_trust(backlinks_data),
         "social_media":               rules.score_social_media(social_data),
         "competitive_link_comparison":rules.score_competitive_link_comparison(backlinks_data),
-        "google_business_profile":    rules.score_gbp(gbp_data),
         "nap":                        rules.score_nap(nap_data),
     }
 

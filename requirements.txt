@@ -11,8 +11,7 @@ yake==0.4.8
 pytrends==4.9.2
 playwright==1.47.0
 jinja2==3.1.4
-weasyprint==62.3
-pydyf==0.11.0
+weasyprint==52.5
 python-multipart==0.0.9
 pyyaml==6.0.2
 aiofiles==24.1.0

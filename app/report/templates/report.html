@@ -227,6 +227,9 @@ p { color: var(--muted); font-size: 13px; margin-bottom: 6px; }
   </div>
 
   <hr class="cover-divider">
+  <div style="margin-bottom:16px;">
+    <a href="/report/{{ job.id }}/pdf" target="_blank" style="display:inline-flex; align-items:center; gap:6px; background:var(--lime); color:var(--green); font-size:12px; font-weight:800; padding:10px 20px; border-radius:8px; text-decoration:none; letter-spacing:.02em;">&#8595; Download PDF Report</a>
+  </div>
   <div class="cover-meta">
     <div class="cover-meta-item"><span class="meta-label">Report date</span><span class="meta-value">{{ job.date }}</span></div>
     <div class="cover-meta-item"><span class="meta-label">Pages checked</span><span class="meta-value">{{ job.pages_crawled }}</span></div>
@@ -243,7 +246,6 @@ p { color: var(--muted); font-size: 13px; margin-bottom: 6px; }
   <button class="tab-btn" onclick="showTab('linking',this)">Linking &amp; Social</button>
   <button class="tab-btn" onclick="showTab('guidelines',this)">Guidelines</button>
   <button class="tab-btn" onclick="showTab('methodology',this)">How we check</button>
-  <a href="/report/{{ job.id }}/pdf" target="_blank" style="margin-left:auto; align-self:center; background:var(--green); color:#fff; font-size:11px; font-weight:700; padding:7px 14px; border-radius:6px; text-decoration:none; white-space:nowrap; letter-spacing:.03em; flex-shrink:0;">&#8595; Download PDF</a>
 </div>
 
 {# ── ELEMENT MACRO ── #}
@@ -502,27 +504,63 @@ p { color: var(--muted); font-size: 13px; margin-bottom: 6px; }
 <div class="tab-panel" id="tab-linking">
 <div class="section">
   <h2>Linking &amp; Social</h2>
-  <p style="margin-bottom:14px;">Other websites linking to yours and your social media presence.</p>
+  <p style="margin-bottom:14px;">Off-page SEO — links from other websites and your social presence. This is the hardest area to improve and the one that takes the most time.</p>
 
+  <!-- Backlink snapshot -->
   {% if backlinks.available %}
-  <div class="stat-box">
-    <h3 style="margin:0 0 6px; font-size:13px;">Backlink Overview (Common Crawl)</h3>
+  <div class="stat-box" style="margin-bottom:16px;">
+    <h3 style="margin:0 0 6px; font-size:13px;">Backlink Snapshot (Common Crawl)</h3>
     {% if backlinks.get("pages_indexed") is not none %}
-    <p><strong>{{ backlinks.pages_indexed }}</strong> pages from this site appear in Common Crawl's index.</p>
+    <p style="margin-bottom:4px;"><strong>{{ backlinks.pages_indexed }}</strong> pages from this site have been indexed by Common Crawl (a free public web index).</p>
     {% endif %}
-    <p style="font-size:11px; color:var(--muted); margin-top:4px;">{{ backlinks.note }}</p>
+    <p style="font-size:11px; color:var(--muted);">{{ backlinks.note }}</p>
+    <p style="font-size:11px; color:var(--muted); margin-top:4px;">For a full backlink report, use <a href="https://ahrefs.com" target="_blank">Ahrefs</a> or <a href="https://semrush.com" target="_blank">Semrush</a>.</p>
   </div>
   {% else %}
-  <div class="stat-box">
+  <div class="stat-box" style="margin-bottom:16px;">
     <p>{{ backlinks.note or "Backlink data could not be retrieved." }}</p>
   </div>
   {% endif %}
 
-  <div class="el-list">
+  <div class="el-list" style="margin-bottom:20px;">
     {{ el("linking_root_domains", "Websites Linking to You") }}
     {{ el("inbound_followed_links", "Followed Backlinks") }}
     {{ el("authority_trust", "Domain Authority") }}
     {{ el("social_media", "Social Media Presence") }}
+  </div>
+
+  <!-- Off-page action plan -->
+  <h2>Off-Page Action Plan</h2>
+  <p style="margin-bottom:12px;">Off-page SEO takes months, not days. Here are the most effective things to focus on:</p>
+  <div class="faq">
+    <div class="faq-item">
+      <div class="faq-q">1. Get listed in local and niche directories</div>
+      <div class="faq-a">Submit your site to relevant directories — Google Business Profile, Yelp, industry associations, local chambers of commerce. These are easy, free backlinks that also help local SEO.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">2. Write guest posts for other sites in your niche</div>
+      <div class="faq-a">Reach out to blogs or news sites in your industry and offer to write an article. Include a link back to your site. One good guest post on a high-authority site is worth more than 50 low-quality links.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">3. Get mentioned in local press and media</div>
+      <div class="faq-a">Local newspaper sites, community blogs, and event listings often link to businesses they cover. Sponsor a local event, issue a press release, or reach out to local journalists.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">4. Ask suppliers and partners to link to you</div>
+      <div class="faq-a">If you work with suppliers, wholesalers, or partner businesses, ask them to add your site to their "stockists" or "partners" page. These are among the easiest legitimate backlinks to get.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">5. Create content worth linking to</div>
+      <div class="faq-a">Guides, data, original research, tools, and useful resources attract natural links over time. "Ultimate guides" and local area pages tend to earn links in local SEO.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">6. Be active on social media</div>
+      <div class="faq-a">Social signals don't directly affect rankings, but an active social presence drives traffic, brand searches, and indirectly helps earn links. Post consistently on the platforms where your audience is.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">7. Fix or reclaim lost links</div>
+      <div class="faq-a">Use a tool like Ahrefs or Google Search Console to find links pointing to broken pages on your site. Redirect those pages to the correct live page so you don't lose the link value.</div>
+    </div>
   </div>
 </div>
 </div>

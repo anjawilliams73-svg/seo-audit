@@ -241,8 +241,27 @@
         {%- if d.get("missing_types") %} Missing recommended types: {{ d.missing_types | join(", ") }}.{%- endif %}
       {%- elif d.get("profiles_found") is defined -%}
         {{ d.profiles_found }} social profile{{ "s" if d.profiles_found != 1 }} linked from the site.
+      {%- elif d.get("avg_internal_links") is defined -%}
+        Average {{ d.avg_internal_links }} internal link{{ "s" if d.avg_internal_links != 1 }} per page.
+        {%- if d.get("pages_with_none", 0) %} {{ d.pages_with_none }} page{{ "s" if d.pages_with_none != 1 }} with no internal links.{%- endif %}
+      {%- elif d.get("total_external") is defined -%}
+        {{ d.get("nofollow", 0) }} nofollow links out of {{ d.total_external }} external links.
+      {%- elif d.get("pages_missing_focus") is defined -%}
+        {{ d.get("pages_checked", 0) }} pages checked. {{ d.pages_missing_focus }} missing clear keyword focus.
+      {%- elif d.get("poor_url_structure") is defined -%}
+        {{ d.get("total", 0) }} URLs checked. {{ d.poor_url_structure }} with poor structure (too long or dynamic params).
+      {%- elif d.get("redirects_302") is defined or d.get("redirect_count") is defined -%}
+        {%- set rc = d.get("redirects_302", d.get("redirect_count", 0)) -%}
+        {{ rc }} redirect{{ "s" if rc != 1 }} using 302 (temporary). Change to 301 if permanent.
+      {%- elif d.get("duplicate_pairs") is defined or d.get("similar_pairs") is defined -%}
+        {%- set pairs = d.get("duplicate_pairs", d.get("similar_pairs", 0)) -%}
+        {{ pairs }} pair{{ "s" if pairs != 1 }} of similar/duplicate pages detected.
+      {%- elif d.get("score") is defined -%}
+        Score: {{ d.score }}.
+      {%- elif d -%}
+        {% for k2, v2 in d.items() %}{{ k2 | replace("_"," ") | title }}: {{ v2 }}. {% endfor %}
       {%- else -%}
-        {{ d | tojson }}
+        No data available.
       {%- endif -%}
     </div>
     {% set urls = el.get("affected_urls", []) %}

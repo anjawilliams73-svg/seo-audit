@@ -23,10 +23,11 @@ load_dotenv()
 
 app = FastAPI(title="SEO Audit Tool", version="1.0.0")
 
-ALLOWED_ORIGIN = os.getenv("ALLOWED_ORIGIN", "*")
+_origin_env = os.getenv("ALLOWED_ORIGIN", "*")
+ALLOWED_ORIGINS = ["*"] if _origin_env == "*" else [o.strip() for o in _origin_env.split(",")]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[ALLOWED_ORIGIN] if ALLOWED_ORIGIN != "*" else ["*"],
+    allow_origins=ALLOWED_ORIGINS,
     allow_methods=["GET", "POST"],
     allow_headers=["*"],
 )

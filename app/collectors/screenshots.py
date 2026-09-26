@@ -10,6 +10,21 @@ from pathlib import Path
 from typing import Any
 
 
+async def _capture(browser, url: str, viewport: dict, out_path: Path, label: str) -> dict:
+    page = await browser.new_page(viewport=viewport)
+    try:
+        # domcontentloaded is more reliable than networkidle on pages with persistent connections
+        await page.goto(url, wait_until="domcontentloaded", timeout=30000)
+        # Give scripts 2s to render visible content
+        await asyncio.sleep(2)
+        await page.screenshot(path=str(out_path), full_page=False)
+        return {"type": label, "path": str(out_path)}
+    except Exception as exc:
+        return {"type": label, "error": str(exc)}
+    finally:
+        await page.close()
+
+
 async def collect(url: str) -> dict[str, Any]:
     try:
         from playwright.async_api import async_playwright
@@ -22,29 +37,21 @@ async def collect(url: str) -> dict[str, Any]:
     async with async_playwright() as pw:
         browser = await pw.chromium.launch(headless=True)
 
-        # desktop
-        page_d = await browser.new_page(viewport={"width": 1280, "height": 800})
-        try:
-            await page_d.goto(url, wait_until="networkidle", timeout=30000)
-            desktop_path = out_dir / "desktop.png"
-            await page_d.screenshot(path=str(desktop_path), full_page=False)
-            results["screenshots"].append({"type": "desktop", "path": str(desktop_path)})
-        except Exception as exc:
-            results["screenshots"].append({"type": "desktop", "error": str(exc)})
-        finally:
-            await page_d.close()
+        desktop = await _capture(
+            browser, url,
+            viewport={"width": 1280, "height": 800},
+            out_path=out_dir / "desktop.png",
+            label="desktop",
+        )
+        results["screenshots"].append(desktop)
 
-        # mobile
-        page_m = await browser.new_page(viewport={"width": 390, "height": 844})
-        try:
-            await page_m.goto(url, wait_until="networkidle", timeout=30000)
-            mobile_path = out_dir / "mobile.png"
-            await page_m.screenshot(path=str(mobile_path), full_page=False)
-            results["screenshots"].append({"type": "mobile", "path": str(mobile_path)})
-        except Exception as exc:
-            results["screenshots"].append({"type": "mobile", "error": str(exc)})
-        finally:
-            await page_m.close()
+        mobile = await _capture(
+            browser, url,
+            viewport={"width": 390, "height": 844},
+            out_path=out_dir / "mobile.png",
+            label="mobile",
+        )
+        results["screenshots"].append(mobile)
 
         await browser.close()
 

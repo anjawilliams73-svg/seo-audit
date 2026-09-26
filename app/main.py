@@ -19,6 +19,8 @@ from fastapi import BackgroundTasks, FastAPI, HTTPException, UploadFile, File, F
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 
+from app.routers import keywords as keywords_router
+
 load_dotenv()
 
 app = FastAPI(title="SEO Audit Tool", version="1.0.0")
@@ -31,6 +33,7 @@ app.add_middleware(
     allow_methods=["GET", "POST"],
     allow_headers=["*"],
 )
+app.include_router(keywords_router.router)
 
 # In-memory job store (use Redis in production)
 _JOBS: dict[str, dict[str, Any]] = {}
